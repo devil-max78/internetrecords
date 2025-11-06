@@ -3,7 +3,6 @@ import cors from 'cors';
 import { db } from './db';
 import { initializeStorage } from './storage';
 import { createInitialAdmin } from './auth';
-import env from './env';
 
 // Import REST routes
 import authRoutes from './routes/auth.routes';
@@ -28,7 +27,7 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/metadata', metadataRoutes);
 
 // Health check endpoint
-app.get('/api/health', (req, res) => {
+app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', message: 'Server is running' });
 });
 

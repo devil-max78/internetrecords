@@ -8,7 +8,7 @@ const router = Router();
 router.use(authMiddleware);
 
 // Get all sub-labels (global, available to all users)
-router.get('/sub-labels', async (req, res) => {
+router.get('/sub-labels', async (_req, res) => {
   try {
     const subLabels = await db.subLabel.findMany({});
     res.json(subLabels);
@@ -37,7 +37,7 @@ router.get('/artists/search', async (req, res) => {
 });
 
 // Get all artists
-router.get('/artists', async (req, res) => {
+router.get('/artists', async (_req, res) => {
   try {
     const artists = await db.artist.findMany();
     res.json(artists);
@@ -71,7 +71,7 @@ router.post('/artists', async (req, res) => {
 });
 
 // Get all publishers
-router.get('/publishers', async (req, res) => {
+router.get('/publishers', async (_req, res) => {
   try {
     const publishers = await db.publisher.findMany();
     res.json(publishers);
@@ -82,7 +82,7 @@ router.get('/publishers', async (req, res) => {
 });
 
 // Get all album categories
-router.get('/album-categories', async (req, res) => {
+router.get('/album-categories', async (_req, res) => {
   try {
     const categories = await db.albumCategory.findMany();
     res.json(categories);
@@ -93,7 +93,7 @@ router.get('/album-categories', async (req, res) => {
 });
 
 // Get all content types
-router.get('/content-types', async (req, res) => {
+router.get('/content-types', async (_req, res) => {
   try {
     const types = await db.contentType.findMany();
     res.json(types);
