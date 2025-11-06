@@ -18,6 +18,14 @@ router.post('/presigned-url', async (req, res) => {
       return res.status(400).json({ error: 'Invalid file type' });
     }
 
+    // Validate MP3 format for audio files
+    if (fileType === 'AUDIO') {
+      const fileExtension = fileName.toLowerCase().split('.').pop();
+      if (fileExtension !== 'mp3') {
+        return res.status(400).json({ error: 'Only MP3 files are allowed for audio uploads' });
+      }
+    }
+
     // Check if release exists and belongs to user
     const release = await db.release.findUnique({ where: { id: releaseId } });
 

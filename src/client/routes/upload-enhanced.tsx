@@ -658,14 +658,22 @@ function UploadEnhancedComponent() {
                 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Audio File
+                    Audio File (MP3 only)
                   </label>
                   <input
                     type="file"
-                    accept=".mp3,.wav,.flac"
+                    accept=".mp3,audio/mpeg"
                     onChange={(e) => {
                       const file = e.target.files?.[0];
-                      if (file) updateTrack(index, 'audioFile', file);
+                      if (file) {
+                        // Validate MP3 format
+                        if (!file.name.toLowerCase().endsWith('.mp3') && file.type !== 'audio/mpeg') {
+                          toast.error('Only MP3 files are allowed for audio uploads');
+                          e.target.value = '';
+                          return;
+                        }
+                        updateTrack(index, 'audioFile', file);
+                      }
                     }}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   />
