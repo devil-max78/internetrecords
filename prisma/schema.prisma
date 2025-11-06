@@ -1,0 +1,87 @@
+// This is your Prisma schema file
+// Learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String    @id @default(uuid())
+  email     String    @unique
+  password  String
+  name      String
+  role      UserRole
+  releases  Release[]
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+
+  @@map("users")
+}
+
+model Release {
+  id         String       @id @default(uuid())
+  title      String
+  status     ReleaseStatus
+  artworkUrl String?      @map("artwork_url")
+  user       User         @relation(fields: [userId], references: [id])
+  userId     String       @map("user_id")
+  tracks     Track[]
+  files      FileUpload[]
+  createdAt  DateTime     @default(now()) @map("created_at")
+  updatedAt  DateTime     @updatedAt @map("updated_at")
+
+  @@map("releases")
+}
+
+model Track {
+  id        String   @id @default(uuid())
+  title     String
+  duration  Int?     // Duration in seconds
+  genre     String?
+  language  String?
+  isrc      String?  // International Standard Recording Code
+  audioUrl  String?  @map("audio_url")
+  release   Release  @relation(fields: [releaseId], references: [id], onDelete: Cascade)
+  releaseId String   @map("release_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("tracks")
+}
+
+model FileUpload {
+  id        String     @id @default(uuid())
+  fileType  FileType   @map("file_type")
+  url       String
+  release   Release    @relation(fields: [releaseId], references: [id], onDelete: Cascade)
+  releaseId String     @map("release_id")
+  createdAt DateTime   @default(now()) @map("created_at")
+  updatedAt DateTime   @updatedAt @map("updated_at")
+
+  @@map("file_uploads")
+}
+
+enum UserRole {
+  ARTIST
+  LABEL
+  ADMIN
+}
+
+enum ReleaseStatus {
+  DRAFT
+  UNDER_REVIEW
+  APPROVED
+  REJECTED
+  DISTRIBUTED
+}
+
+enum FileType {
+  AUDIO
+  ARTWORK
+  METADATA
+}
