@@ -431,7 +431,7 @@ router.delete('/tracks/:id', async (req, res) => {
 });
 
 // Get all YouTube claims (admin only)
-router.get('/youtube-claims', async (req, res) => {
+router.get('/youtube-claims', async (_req, res) => {
   try {
     const claims = await db.youtubeClaim.findMany();
     res.json(claims);
@@ -477,7 +477,7 @@ router.patch('/youtube-claims/:id', async (req, res) => {
 });
 
 // Get all users (admin only)
-router.get('/users', async (req, res) => {
+router.get('/users', async (_req, res) => {
   try {
     const users = await db.user.findMany();
     res.json(users);
@@ -515,7 +515,7 @@ router.patch('/users/:id/role', async (req, res) => {
 });
 
 // Get all YouTube OAC requests (admin only)
-router.get('/youtube-oac-requests', async (req, res) => {
+router.get('/youtube-oac-requests', async (_req, res) => {
   try {
     const requests = await db.youtubeOacRequest.findMany();
     res.json(requests);
@@ -561,7 +561,7 @@ router.patch('/youtube-oac-requests/:id', async (req, res) => {
 });
 
 // Get all social media linking requests (admin only)
-router.get('/social-media-linking', async (req, res) => {
+router.get('/social-media-linking', async (_req, res) => {
   try {
     const requests = await db.socialMediaLinking.findMany();
     res.json(requests);
