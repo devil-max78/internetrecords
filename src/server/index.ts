@@ -1,5 +1,6 @@
 import express from 'express';
 import cors from 'cors';
+import path from 'path';
 import { db } from './db';
 import { initializeStorage } from './storage';
 import { createInitialAdmin } from './auth';
@@ -19,6 +20,10 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
+// Serve static files from the client build
+const clientPath = path.join(__dirname, '..', 'client');
+app.use(express.static(clientPath));
+
 // REST API routes
 app.use('/api/auth', authRoutes);
 app.use('/api/releases', releaseRoutes);
@@ -29,6 +34,11 @@ app.use('/api/metadata', metadataRoutes);
 // Health check endpoint
 app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', message: 'Server is running' });
+});
+
+// Serve index.html for all other routes (SPA support)
+app.get('*', (_req, res) => {
+  res.sendFile(path.join(clientPath, 'index.html'));
 });
 
 // Start server
