@@ -13,6 +13,12 @@ import { dashboardRoute } from './routes/dashboard';
 import { uploadEnhancedRoute as uploadRoute } from './routes/upload-enhanced';
 import { releaseDetailRoute } from './routes/release-detail';
 import { adminRoute } from './routes/admin';
+import { adminSettingsRoute } from './routes/admin-settings';
+import { youtubeClaimRoute } from './routes/youtube-claim';
+import { adminYoutubeClaimsRoute } from './routes/admin-youtube-claims';
+import { youtubeOacRoute } from './routes/youtube-oac';
+import { socialMediaLinkingRoute } from './routes/social-media-linking';
+import { labelPublisherSettingsRoute } from './routes/label-publisher-settings';
 
 // Create query client outside component
 const queryClient = new QueryClient({
@@ -34,6 +40,12 @@ const routeTree = rootRoute.addChildren([
   uploadRoute,
   releaseDetailRoute,
   adminRoute,
+  adminSettingsRoute,
+  youtubeClaimRoute,
+  adminYoutubeClaimsRoute,
+  youtubeOacRoute,
+  socialMediaLinkingRoute,
+  labelPublisherSettingsRoute,
 ]);
 
 const router = createRouter({ 

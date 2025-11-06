@@ -24,6 +24,11 @@ type TrackData = {
   genre?: string;
   language?: string;
   isrc?: string;
+  lyricist?: string;
+  composer?: string;
+  producer?: string;
+  featuring?: string;
+  singer?: string;
   crbtStartTime?: number;
   crbtEndTime?: number;
   audioFile?: File;
@@ -199,6 +204,11 @@ function UploadEnhancedComponent() {
           genre: track.genre,
           language: track.language,
           isrc: track.isrc,
+          singer: track.singer,
+          lyricist: track.lyricist,
+          composer: track.composer,
+          producer: track.producer,
+          featuring: track.featuring,
           crbtStartTime: track.crbtStartTime,
           crbtEndTime: track.crbtEndTime,
         };
@@ -578,6 +588,71 @@ function UploadEnhancedComponent() {
                     onChange={(e) => updateTrack(index, 'isrc', e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     placeholder="International Standard Recording Code"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Singer
+                  </label>
+                  <input
+                    type="text"
+                    value={track.singer || ''}
+                    onChange={(e) => updateTrack(index, 'singer', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    placeholder="Singer name"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Lyricist
+                  </label>
+                  <input
+                    type="text"
+                    value={track.lyricist || ''}
+                    onChange={(e) => updateTrack(index, 'lyricist', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    placeholder="Lyricist name"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Composer
+                  </label>
+                  <input
+                    type="text"
+                    value={track.composer || ''}
+                    onChange={(e) => updateTrack(index, 'composer', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    placeholder="Composer name"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Producer
+                  </label>
+                  <input
+                    type="text"
+                    value={track.producer || ''}
+                    onChange={(e) => updateTrack(index, 'producer', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    placeholder="Producer name"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Featuring
+                  </label>
+                  <input
+                    type="text"
+                    value={track.featuring || ''}
+                    onChange={(e) => updateTrack(index, 'featuring', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    placeholder="Featured artists"
                   />
                 </div>
                 

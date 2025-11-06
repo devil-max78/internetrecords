@@ -11,6 +11,10 @@ import releaseRoutes from './routes/release.routes';
 import uploadRoutes from './routes/upload.routes';
 import adminRoutes from './routes/admin.routes';
 import metadataRoutes from './routes/metadata.routes';
+import youtubeClaimRoutes from './routes/youtube-claim.routes';
+import youtubeOacRoutes from './routes/youtube-oac.routes';
+import socialMediaLinkingRoutes from './routes/social-media-linking.routes';
+import labelPublisherRoutes from './routes/label-publisher.routes';
 
 // Initialize Express app
 const app = express();
@@ -30,6 +34,10 @@ app.use('/api/releases', releaseRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/metadata', metadataRoutes);
+app.use('/api/youtube-claims', youtubeClaimRoutes);
+app.use('/api/youtube-oac', youtubeOacRoutes);
+app.use('/api/social-media-linking', socialMediaLinkingRoutes);
+app.use('/api/label-publisher', labelPublisherRoutes);
 
 // Health check endpoint
 app.get('/api/health', (_req, res) => {

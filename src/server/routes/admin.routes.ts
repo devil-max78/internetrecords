@@ -266,6 +266,102 @@ router.post('/content-types', async (req, res) => {
   }
 });
 
+// Delete sub-label
+router.delete('/sub-labels/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    // Check if sub-label is being used by any releases
+    const releases = await db.release.findMany({ where: { subLabelId: id } });
+    if (releases && releases.length > 0) {
+      return res.status(400).json({ 
+        error: `Cannot delete: This sub-label is used by ${releases.length} release(s). Please remove it from those releases first.` 
+      });
+    }
+    
+    await db.subLabel.delete({ where: { id } });
+    res.json({ success: true, message: 'Sub-label deleted successfully' });
+  } catch (error: any) {
+    console.error('Delete sub-label error:', error);
+    if (error.code === '23503') {
+      return res.status(400).json({ error: 'Cannot delete: This item is currently in use' });
+    }
+    res.status(500).json({ error: error.message || 'Failed to delete sub-label' });
+  }
+});
+
+// Delete publisher
+router.delete('/publishers/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    // Check if publisher is being used
+    const releases = await db.release.findMany({ where: { publisherId: id } });
+    if (releases && releases.length > 0) {
+      return res.status(400).json({ 
+        error: `Cannot delete: This publisher is used by ${releases.length} release(s)` 
+      });
+    }
+    
+    await db.publisher.delete({ where: { id } });
+    res.json({ success: true, message: 'Publisher deleted successfully' });
+  } catch (error: any) {
+    console.error('Delete publisher error:', error);
+    if (error.code === '23503') {
+      return res.status(400).json({ error: 'Cannot delete: This item is currently in use' });
+    }
+    res.status(500).json({ error: 'Failed to delete publisher' });
+  }
+});
+
+// Delete album category
+router.delete('/album-categories/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    // Check if category is being used
+    const releases = await db.release.findMany({ where: { albumCategoryId: id } });
+    if (releases && releases.length > 0) {
+      return res.status(400).json({ 
+        error: `Cannot delete: This category is used by ${releases.length} release(s)` 
+      });
+    }
+    
+    await db.albumCategory.delete({ where: { id } });
+    res.json({ success: true, message: 'Album category deleted successfully' });
+  } catch (error: any) {
+    console.error('Delete album category error:', error);
+    if (error.code === '23503') {
+      return res.status(400).json({ error: 'Cannot delete: This item is currently in use' });
+    }
+    res.status(500).json({ error: 'Failed to delete album category' });
+  }
+});
+
+// Delete content type
+router.delete('/content-types/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    // Check if content type is being used
+    const releases = await db.release.findMany({ where: { contentTypeId: id } });
+    if (releases && releases.length > 0) {
+      return res.status(400).json({ 
+        error: `Cannot delete: This content type is used by ${releases.length} release(s)` 
+      });
+    }
+    
+    await db.contentType.delete({ where: { id } });
+    res.json({ success: true, message: 'Content type deleted successfully' });
+  } catch (error: any) {
+    console.error('Delete content type error:', error);
+    if (error.code === '23503') {
+      return res.status(400).json({ error: 'Cannot delete: This item is currently in use' });
+    }
+    res.status(500).json({ error: 'Failed to delete content type' });
+  }
+});
+
 // Create sub-label (admin only)
 router.post('/sub-labels', async (req, res) => {
   try {
@@ -279,10 +375,11 @@ router.post('/sub-labels', async (req, res) => {
     res.status(201).json(subLabel);
   } catch (error: any) {
     console.error('Create sub-label error:', error);
+    console.error('Error details:', error.message, error.code, error.details);
     if (error.code === '23505') {
       return res.status(409).json({ error: 'Sub-label already exists' });
     }
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({ error: error.message || 'Internal server error' });
   }
 });
 
@@ -330,6 +427,182 @@ router.delete('/tracks/:id', async (req, res) => {
   } catch (error: any) {
     console.error('Delete track error:', error);
     res.status(500).json({ error: 'Failed to delete track' });
+  }
+});
+
+// Get all YouTube claims (admin only)
+router.get('/youtube-claims', async (req, res) => {
+  try {
+    const claims = await db.youtubeClaim.findMany();
+    res.json(claims);
+  } catch (error: any) {
+    console.error('Get YouTube claims error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Update YouTube claim status (admin only)
+router.patch('/youtube-claims/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status, notes } = req.body;
+
+    if (!status) {
+      return res.status(400).json({ error: 'Status is required' });
+    }
+
+    const validStatuses = ['PENDING', 'PROCESSING', 'COMPLETED', 'REJECTED'];
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({ error: 'Invalid status' });
+    }
+
+    const updateData: any = { status };
+    if (notes !== undefined) {
+      updateData.notes = notes;
+    }
+    if (status === 'COMPLETED' || status === 'REJECTED') {
+      updateData.processedAt = new Date().toISOString();
+    }
+
+    const claim = await db.youtubeClaim.update({
+      where: { id },
+      data: updateData,
+    });
+
+    res.json(claim);
+  } catch (error: any) {
+    console.error('Update YouTube claim error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Get all users (admin only)
+router.get('/users', async (req, res) => {
+  try {
+    const users = await db.user.findMany();
+    res.json(users);
+  } catch (error: any) {
+    console.error('Get users error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Update user role (admin only)
+router.patch('/users/:id/role', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { role } = req.body;
+
+    if (!role) {
+      return res.status(400).json({ error: 'Role is required' });
+    }
+
+    const validRoles = ['ARTIST', 'LABEL', 'ADMIN'];
+    if (!validRoles.includes(role)) {
+      return res.status(400).json({ error: 'Invalid role' });
+    }
+
+    const user = await db.user.update({
+      where: { id },
+      data: { role },
+    });
+
+    res.json(user);
+  } catch (error: any) {
+    console.error('Update user role error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Get all YouTube OAC requests (admin only)
+router.get('/youtube-oac-requests', async (req, res) => {
+  try {
+    const requests = await db.youtubeOacRequest.findMany();
+    res.json(requests);
+  } catch (error: any) {
+    console.error('Get YouTube OAC requests error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Update YouTube OAC request status (admin only)
+router.patch('/youtube-oac-requests/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status, adminNotes } = req.body;
+
+    if (!status) {
+      return res.status(400).json({ error: 'Status is required' });
+    }
+
+    const validStatuses = ['PENDING', 'PROCESSING', 'APPROVED', 'REJECTED'];
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({ error: 'Invalid status' });
+    }
+
+    const updateData: any = { status };
+    if (adminNotes !== undefined) {
+      updateData.adminNotes = adminNotes;
+    }
+    if (status === 'APPROVED' || status === 'REJECTED') {
+      updateData.processedAt = new Date().toISOString();
+    }
+
+    const request = await db.youtubeOacRequest.update({
+      where: { id },
+      data: updateData,
+    });
+
+    res.json(request);
+  } catch (error: any) {
+    console.error('Update YouTube OAC request error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Get all social media linking requests (admin only)
+router.get('/social-media-linking', async (req, res) => {
+  try {
+    const requests = await db.socialMediaLinking.findMany();
+    res.json(requests);
+  } catch (error: any) {
+    console.error('Get social media linking requests error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Update social media linking request status (admin only)
+router.patch('/social-media-linking/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status, adminNotes } = req.body;
+
+    if (!status) {
+      return res.status(400).json({ error: 'Status is required' });
+    }
+
+    const validStatuses = ['PENDING', 'PROCESSING', 'COMPLETED', 'REJECTED'];
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({ error: 'Invalid status' });
+    }
+
+    const updateData: any = { status };
+    if (adminNotes !== undefined) {
+      updateData.adminNotes = adminNotes;
+    }
+    if (status === 'COMPLETED' || status === 'REJECTED') {
+      updateData.processedAt = new Date().toISOString();
+    }
+
+    const request = await db.socialMediaLinking.update({
+      where: { id },
+      data: updateData,
+    });
+
+    res.json(request);
+  } catch (error: any) {
+    console.error('Update social media linking request error:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 

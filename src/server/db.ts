@@ -34,6 +34,18 @@ export const userOperations = {
     return data;
   },
 
+  findMany: async (options: any = {}) => {
+    let query = supabase.from('users').select('*').order('created_at', { ascending: false });
+
+    if (options.where) {
+      query = query.match(options.where);
+    }
+
+    const { data, error } = await query;
+    if (error) throw error;
+    return data || [];
+  },
+
   create: async (options: any) => {
     const data = options.data || options;
     
@@ -48,7 +60,21 @@ export const userOperations = {
 
     if (error) throw error;
     return newUser;
-  }
+  },
+
+  update: async (options: any) => {
+    const { where, data } = options;
+
+    const { data: updated, error } = await supabase
+      .from('users')
+      .update(data)
+      .match(where)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return updated;
+  },
 };
 
 // Helper function to convert camelCase to snake_case
@@ -378,15 +404,30 @@ export const subLabelOperations = {
     if (error) throw error;
     return data ? data.map(toCamelCase) : [];
   },
+
+  delete: async (options: any) => {
+    const where = options.where || options;
+    const snakeWhere = toSnakeCase(where);
+
+    const { error } = await supabase
+      .from('sub_labels')
+      .delete()
+      .eq('id', snakeWhere.id);
+
+    if (error) throw error;
+    return { success: true };
+  },
 };
 
 // Artist operations
 export const artistOperations = {
   create: async (options: any) => {
     const data = options.data || options;
+    const snakeData = toSnakeCase(data);
+    
     const { data: newArtist, error } = await supabase
       .from('artists')
-      .insert(data)
+      .insert(snakeData)
       .select()
       .single();
 
@@ -432,14 +473,29 @@ export const publisherOperations = {
 
   create: async (options: any) => {
     const data = options.data || options;
+    const snakeData = toSnakeCase(data);
+    
     const { data: newPublisher, error } = await supabase
       .from('publishers')
-      .insert(data)
+      .insert(snakeData)
       .select()
       .single();
 
     if (error) throw error;
     return toCamelCase(newPublisher);
+  },
+
+  delete: async (options: any) => {
+    const where = options.where || options;
+    const snakeWhere = toSnakeCase(where);
+
+    const { error } = await supabase
+      .from('publishers')
+      .delete()
+      .eq('id', snakeWhere.id);
+
+    if (error) throw error;
+    return { success: true };
   },
 };
 
@@ -457,14 +513,29 @@ export const albumCategoryOperations = {
 
   create: async (options: any) => {
     const data = options.data || options;
+    const snakeData = toSnakeCase(data);
+    
     const { data: newCategory, error } = await supabase
       .from('album_categories')
-      .insert(data)
+      .insert(snakeData)
       .select()
       .single();
 
     if (error) throw error;
     return toCamelCase(newCategory);
+  },
+
+  delete: async (options: any) => {
+    const where = options.where || options;
+    const snakeWhere = toSnakeCase(where);
+
+    const { error } = await supabase
+      .from('album_categories')
+      .delete()
+      .eq('id', snakeWhere.id);
+
+    if (error) throw error;
+    return { success: true };
   },
 };
 
@@ -482,14 +553,298 @@ export const contentTypeOperations = {
 
   create: async (options: any) => {
     const data = options.data || options;
+    const snakeData = toSnakeCase(data);
+    
     const { data: newType, error } = await supabase
       .from('content_types')
-      .insert(data)
+      .insert(snakeData)
       .select()
       .single();
 
     if (error) throw error;
     return toCamelCase(newType);
+  },
+
+  delete: async (options: any) => {
+    const where = options.where || options;
+    const snakeWhere = toSnakeCase(where);
+
+    const { error } = await supabase
+      .from('content_types')
+      .delete()
+      .eq('id', snakeWhere.id);
+
+    if (error) throw error;
+    return { success: true };
+  },
+};
+
+// YouTube Claim operations
+export const youtubeClaimOperations = {
+  create: async (options: any) => {
+    const data = options.data || options;
+    const snakeData = toSnakeCase(data);
+
+    const { data: newClaim, error } = await supabase
+      .from('youtube_claims')
+      .insert(snakeData)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return toCamelCase(newClaim);
+  },
+
+  findMany: async (options: any = {}) => {
+    let query = supabase.from('youtube_claims').select('*').order('created_at', { ascending: false });
+
+    if (options.where) {
+      const snakeWhere = toSnakeCase(options.where);
+      query = query.match(snakeWhere);
+    }
+
+    const { data, error } = await query;
+    if (error) throw error;
+    return data ? data.map(toCamelCase) : [];
+  },
+
+  findUnique: async (options: any) => {
+    const where = options.where || options;
+    const snakeWhere = toSnakeCase(where);
+
+    const { data, error } = await supabase
+      .from('youtube_claims')
+      .select('*')
+      .match(snakeWhere)
+      .single();
+
+    if (error) {
+      if (error.code === 'PGRST116') return null;
+      throw error;
+    }
+    return toCamelCase(data);
+  },
+
+  update: async (options: any) => {
+    const { where, data } = options;
+    const snakeWhere = toSnakeCase(where);
+    const snakeData = toSnakeCase(data);
+
+    const { data: updated, error } = await supabase
+      .from('youtube_claims')
+      .update(snakeData)
+      .match(snakeWhere)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return toCamelCase(updated);
+  },
+};
+
+// YouTube OAC Request operations
+export const youtubeOacRequestOperations = {
+  create: async (options: any) => {
+    const data = options.data || options;
+    const snakeData = toSnakeCase(data);
+
+    const { data: newRequest, error } = await supabase
+      .from('youtube_oac_requests')
+      .insert(snakeData)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return toCamelCase(newRequest);
+  },
+
+  findMany: async (options: any = {}) => {
+    let query = supabase.from('youtube_oac_requests').select('*').order('created_at', { ascending: false });
+
+    if (options.where) {
+      const snakeWhere = toSnakeCase(options.where);
+      query = query.match(snakeWhere);
+    }
+
+    const { data, error } = await query;
+    if (error) throw error;
+    return data ? data.map(toCamelCase) : [];
+  },
+
+  findUnique: async (options: any) => {
+    const where = options.where || options;
+    const snakeWhere = toSnakeCase(where);
+
+    const { data, error } = await supabase
+      .from('youtube_oac_requests')
+      .select('*')
+      .match(snakeWhere)
+      .single();
+
+    if (error) {
+      if (error.code === 'PGRST116') return null;
+      throw error;
+    }
+    return toCamelCase(data);
+  },
+
+  update: async (options: any) => {
+    const { where, data } = options;
+    const snakeWhere = toSnakeCase(where);
+    const snakeData = toSnakeCase(data);
+
+    const { data: updated, error } = await supabase
+      .from('youtube_oac_requests')
+      .update(snakeData)
+      .match(snakeWhere)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return toCamelCase(updated);
+  },
+};
+
+// Social Media Linking Request operations
+export const socialMediaLinkingOperations = {
+  create: async (options: any) => {
+    const data = options.data || options;
+    const snakeData = toSnakeCase(data);
+
+    const { data: newRequest, error } = await supabase
+      .from('social_media_linking_requests')
+      .insert(snakeData)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return toCamelCase(newRequest);
+  },
+
+  findMany: async (options: any = {}) => {
+    let query = supabase.from('social_media_linking_requests').select('*').order('created_at', { ascending: false });
+
+    if (options.where) {
+      const snakeWhere = toSnakeCase(options.where);
+      query = query.match(snakeWhere);
+    }
+
+    const { data, error } = await query;
+    if (error) throw error;
+    return data ? data.map(toCamelCase) : [];
+  },
+
+  update: async (options: any) => {
+    const { where, data } = options;
+    const snakeWhere = toSnakeCase(where);
+    const snakeData = toSnakeCase(data);
+
+    const { data: updated, error } = await supabase
+      .from('social_media_linking_requests')
+      .update(snakeData)
+      .match(snakeWhere)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return toCamelCase(updated);
+  },
+};
+
+// Global Settings operations
+export const globalSettingsOperations = {
+  get: async (key: string) => {
+    const { data, error } = await supabase
+      .from('global_settings')
+      .select('*')
+      .eq('setting_key', key)
+      .single();
+
+    if (error) {
+      if (error.code === 'PGRST116') return null;
+      throw error;
+    }
+    return toCamelCase(data);
+  },
+
+  set: async (key: string, value: string) => {
+    const { data, error } = await supabase
+      .from('global_settings')
+      .upsert({ setting_key: key, setting_value: value })
+      .select()
+      .single();
+
+    if (error) throw error;
+    return toCamelCase(data);
+  },
+
+  getAll: async () => {
+    const { data, error } = await supabase
+      .from('global_settings')
+      .select('*');
+
+    if (error) throw error;
+    return data ? data.map(toCamelCase) : [];
+  },
+};
+
+// User Label operations
+export const userLabelOperations = {
+  create: async (options: any) => {
+    const data = options.data || options;
+    const snakeData = toSnakeCase(data);
+
+    const { data: newLabel, error } = await supabase
+      .from('user_labels')
+      .insert(snakeData)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return toCamelCase(newLabel);
+  },
+
+  findMany: async (options: any = {}) => {
+    let query = supabase.from('user_labels').select('*').order('created_at', { ascending: false });
+
+    if (options.where) {
+      const snakeWhere = toSnakeCase(options.where);
+      query = query.match(snakeWhere);
+    }
+
+    const { data, error } = await query;
+    if (error) throw error;
+    return data ? data.map(toCamelCase) : [];
+  },
+};
+
+// User Publisher operations
+export const userPublisherOperations = {
+  create: async (options: any) => {
+    const data = options.data || options;
+    const snakeData = toSnakeCase(data);
+
+    const { data: newPublisher, error } = await supabase
+      .from('user_publishers')
+      .insert(snakeData)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return toCamelCase(newPublisher);
+  },
+
+  findMany: async (options: any = {}) => {
+    let query = supabase.from('user_publishers').select('*').order('created_at', { ascending: false });
+
+    if (options.where) {
+      const snakeWhere = toSnakeCase(options.where);
+      query = query.match(snakeWhere);
+    }
+
+    const { data, error } = await query;
+    if (error) throw error;
+    return data ? data.map(toCamelCase) : [];
   },
 };
 
@@ -504,6 +859,12 @@ export const db = {
   publisher: publisherOperations,
   albumCategory: albumCategoryOperations,
   contentType: contentTypeOperations,
+  youtubeClaim: youtubeClaimOperations,
+  youtubeOacRequest: youtubeOacRequestOperations,
+  socialMediaLinking: socialMediaLinkingOperations,
+  globalSettings: globalSettingsOperations,
+  userLabel: userLabelOperations,
+  userPublisher: userPublisherOperations,
   $disconnect: disconnect
 };
 

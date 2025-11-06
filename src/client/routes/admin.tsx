@@ -275,12 +275,26 @@ function AdminComponent() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold text-indigo-800">Admin Dashboard</h1>
-        <button
-          onClick={generateCSV}
-          className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition"
-        >
-          Download All CSV
-        </button>
+        <div className="flex gap-3">
+          <a
+            href="/admin/youtube-claims"
+            className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition"
+          >
+            YouTube Claims
+          </a>
+          <a
+            href="/admin/settings"
+            className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition"
+          >
+            Settings
+          </a>
+          <button
+            onClick={generateCSV}
+            className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition"
+          >
+            Download All CSV
+          </button>
+        </div>
       </div>
       
       <div className="bg-white rounded-lg shadow-md overflow-hidden">

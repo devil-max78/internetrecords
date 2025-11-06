@@ -37,8 +37,15 @@ function SignupComponent() {
 
   return (
     <div className="flex justify-center items-center min-h-[80vh]">
-      <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
-        <h1 className="text-3xl font-bold text-center mb-6 text-indigo-700">Sign Up</h1>
+      <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
+        <div className="flex justify-center mb-1">
+          <img
+            src="/assets/logo.svg"
+            alt="Internet Records"
+            className="h-72 w-auto"
+          />
+        </div>
+        <h1 className="text-3xl font-bold text-center mb-4 text-indigo-700">Sign Up</h1>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div>
             <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">

@@ -145,6 +145,42 @@ export const api = {
         body: JSON.stringify({ name }),
       }),
     
+    createSubLabel: (name: string) =>
+      fetchAPI('/admin/sub-labels', {
+        method: 'POST',
+        body: JSON.stringify({ name }),
+      }),
+    
+    // Delete endpoints
+    deleteSubLabel: (id: string) =>
+      fetchAPI(`/admin/sub-labels/${id}`, {
+        method: 'DELETE',
+      }),
+    
+    deletePublisher: (id: string) =>
+      fetchAPI(`/admin/publishers/${id}`, {
+        method: 'DELETE',
+      }),
+    
+    deleteAlbumCategory: (id: string) =>
+      fetchAPI(`/admin/album-categories/${id}`, {
+        method: 'DELETE',
+      }),
+    
+    deleteContentType: (id: string) =>
+      fetchAPI(`/admin/content-types/${id}`, {
+        method: 'DELETE',
+      }),
+    
+    // User management
+    getAllUsers: () => fetchAPI('/admin/users'),
+    
+    updateUserRole: (id: string, role: string) =>
+      fetchAPI(`/admin/users/${id}/role`, {
+        method: 'PATCH',
+        body: JSON.stringify({ role }),
+      }),
+    
     deleteRelease: (id: string) =>
       fetchAPI(`/admin/releases/${id}`, {
         method: 'DELETE',
@@ -182,5 +218,115 @@ export const api = {
     getAlbumCategories: () => fetchAPI('/metadata/album-categories'),
     
     getContentTypes: () => fetchAPI('/metadata/content-types'),
+  },
+
+  // YouTube Claims
+  youtubeClaims: {
+    create: (data: { releaseId?: string; videoUrls: string }) =>
+      fetchAPI('/youtube-claims', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }),
+    
+    getAll: () => fetchAPI('/youtube-claims'),
+    
+    getById: (id: string) => fetchAPI(`/youtube-claims/${id}`),
+    
+    // Admin endpoints
+    getAllAdmin: () => fetchAPI('/admin/youtube-claims'),
+    
+    updateStatus: (id: string, status: string, notes?: string) =>
+      fetchAPI(`/admin/youtube-claims/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ status, notes }),
+      }),
+  },
+
+  // YouTube OAC Requests
+  youtubeOac: {
+    create: (data: { channelLink: string; legalName: string; channelName: string }) =>
+      fetchAPI('/youtube-oac', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }),
+    
+    getAll: () => fetchAPI('/youtube-oac'),
+    
+    getById: (id: string) => fetchAPI(`/youtube-oac/${id}`),
+    
+    // Admin endpoints
+    getAllAdmin: () => fetchAPI('/admin/youtube-oac-requests'),
+    
+    updateStatus: (id: string, status: string, adminNotes?: string) =>
+      fetchAPI(`/admin/youtube-oac-requests/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ status, adminNotes }),
+      }),
+  },
+
+  // Social Media Linking Requests
+  socialMediaLinking: {
+    create: (data: { 
+      email: string; 
+      label: string; 
+      platforms: string; 
+      facebookPageUrl?: string; 
+      instagramHandle?: string; 
+      isrc: string 
+    }) =>
+      fetchAPI('/social-media-linking', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }),
+    
+    getAll: () => fetchAPI('/social-media-linking'),
+    
+    // Admin endpoints
+    getAllAdmin: () => fetchAPI('/admin/social-media-linking'),
+    
+    updateStatus: (id: string, status: string, adminNotes?: string) =>
+      fetchAPI(`/admin/social-media-linking/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ status, adminNotes }),
+      }),
+  },
+
+  // Label & Publisher Settings
+  labelPublisher: {
+    getGlobalDefaults: () => fetchAPI('/label-publisher/global-defaults'),
+    
+    getUserLabels: () => fetchAPI('/label-publisher/user-labels'),
+    
+    getUserPublishers: () => fetchAPI('/label-publisher/user-publishers'),
+    
+    addUserLabel: (labelName: string) =>
+      fetchAPI('/label-publisher/user-labels', {
+        method: 'POST',
+        body: JSON.stringify({ labelName }),
+      }),
+    
+    addUserPublisher: (publisherName: string) =>
+      fetchAPI('/label-publisher/user-publishers', {
+        method: 'POST',
+        body: JSON.stringify({ publisherName }),
+      }),
+    
+    deleteUserLabel: (id: string) =>
+      fetchAPI(`/label-publisher/user-labels/${id}`, {
+        method: 'DELETE',
+      }),
+    
+    deleteUserPublisher: (id: string) =>
+      fetchAPI(`/label-publisher/user-publishers/${id}`, {
+        method: 'DELETE',
+      }),
+    
+    getUserPreferences: () => fetchAPI('/label-publisher/user-preferences'),
+    
+    updateUserPreferences: (data: { customLabel: string | null; customPublisher: string | null }) =>
+      fetchAPI('/label-publisher/user-preferences', {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      }),
   },
 };
