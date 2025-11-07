@@ -1,5 +1,13 @@
-# Vercel ignore file
 node_modules
 .env
 .env.local
+src
+scripts
+*.md
+!README.md
+test-*.js
 *.log
+.git
+.vscode
+.idea
+railway.json

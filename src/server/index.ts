@@ -101,5 +101,10 @@ process.on('SIGTERM', async () => {
   process.exit(0);
 });
 
-// Start the server
-startServer();
+// Start the server (only if not in Vercel serverless environment)
+if (process.env.VERCEL !== '1') {
+  startServer();
+}
+
+// Export the Express app for Vercel serverless
+export default app;

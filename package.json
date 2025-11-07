@@ -12,6 +12,7 @@
     "build": "npm run build:client && npm run build:server && npm run postbuild",
     "postbuild": "node -e \"console.log('Build complete. Checking output...')\" && ls -la dist || dir dist",
     "start": "node dist/server/index.js",
+    "vercel-build": "npm run build",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "create-admin": "ts-node scripts/create-admin.ts",
