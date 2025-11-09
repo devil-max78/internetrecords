@@ -96,19 +96,19 @@
       <!-- MAIN BODY -->
       <div class="content">
         <p>Hello {{user_name}},</p>
-        <p>Your submission is approved. It will be published on supported platforms within <strong>48 hours</strong>.</p>
+        <p><strong>{{status_message}}</strong></p>
 
         <!-- INFO BLOCK -->
         <div class="section">
-          <div class="row"><span class="label">Approval Date:</span> {{date}}</div>
+          <div class="row"><span class="label">Update Date:</span> {{date}}</div>
           <div class="row"><span class="label">Song Name:</span> {{song_name}}</div>
           <div class="row"><span class="label">Singer:</span> {{singer_name}}</div>
           <div class="row"><span class="label">Publisher:</span> Internet Records</div>
-          <div class="row"><span class="label">Status:</span> Approved</div>
+          <div class="row"><span class="label">Status:</span> {{song_status}}</div>
         </div>
 
         <p>If any information needs correction, reply with updated details.</p>
-        <p>You will be notified once the track becomes publicly available.</p>
+        <p>You will be notified of any further updates.</p>
       </div>
 
       <!-- FOOTER -->

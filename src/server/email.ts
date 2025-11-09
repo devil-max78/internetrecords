@@ -36,6 +36,7 @@ interface EmailTemplateParams {
   singer_name: string;
   song_status: string;
   date: string;
+  status_message?: string;
 }
 
 export async function sendStatusUpdateEmail(params: EmailTemplateParams): Promise<void> {
@@ -51,6 +52,7 @@ export async function sendStatusUpdateEmail(params: EmailTemplateParams): Promis
         song_name: params.song_name,
         singer_name: params.singer_name,
         song_status: params.song_status,
+        status_message: params.status_message || 'Your submission status has been updated.',
         date: params.date,
       },
     };
@@ -91,5 +93,20 @@ export function formatStatusForEmail(status: string): string {
       return 'Under Review ⏳';
     default:
       return status;
+  }
+}
+
+export function getStatusMessage(status: string): string {
+  switch (status) {
+    case 'APPROVED':
+      return 'Audio will be live within 48 hours.';
+    case 'REJECTED':
+      return 'Please solve the issues with your audio and submit again.';
+    case 'DISTRIBUTED':
+      return 'Your audio is now live on all supported platforms.';
+    case 'UNDER_REVIEW':
+      return 'Your submission is currently under review. You will be notified once it is processed.';
+    default:
+      return 'Your submission status has been updated.';
   }
 }

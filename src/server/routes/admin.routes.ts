@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { db } from '../db';
 import { authMiddleware, adminMiddleware } from '../middleware/auth';
 import { generateDownloadUrl } from '../storage';
-import { sendStatusUpdateEmail, formatStatusForEmail } from '../email';
+import { sendStatusUpdateEmail, formatStatusForEmail, getStatusMessage } from '../email';
 
 const router = Router();
 
@@ -38,6 +38,7 @@ router.post('/releases/:id/approve', async (req, res) => {
         song_name: firstTrack.title || release.title,
         singer_name: release.user.name || 'Unknown Artist',
         song_status: formatStatusForEmail('APPROVED'),
+        status_message: getStatusMessage('APPROVED'),
         date: new Date().toLocaleDateString('en-US', { 
           year: 'numeric', 
           month: 'long', 
@@ -81,6 +82,7 @@ router.post('/releases/:id/reject', async (req, res) => {
         song_name: firstTrack.title || release.title,
         singer_name: release.user.name || 'Unknown Artist',
         song_status: formatStatusForEmail('REJECTED'),
+        status_message: getStatusMessage('REJECTED'),
         date: new Date().toLocaleDateString('en-US', { 
           year: 'numeric', 
           month: 'long', 
@@ -124,6 +126,7 @@ router.post('/releases/:id/distribute', async (req, res) => {
         song_name: firstTrack.title || release.title,
         singer_name: release.user.name || 'Unknown Artist',
         song_status: formatStatusForEmail('DISTRIBUTED'),
+        status_message: getStatusMessage('DISTRIBUTED'),
         date: new Date().toLocaleDateString('en-US', { 
           year: 'numeric', 
           month: 'long', 
