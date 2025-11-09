@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Submission Approved — Internet Records</title>
+
+<style>
+  body{
+    margin:0;
+    padding:0;
+    background:#0f0f0f;
+    font-family:Arial, sans-serif;
+    color:#111;
+  }
+
+  .outer{
+    padding:40px 0;
+  }
+
+  .card{
+    width:100%;
+    max-width:650px;
+    margin:0 auto;
+    background:#ffffff;
+    border-radius:8px;
+    overflow:hidden;
+    border:1px solid #1b1b1b;
+  }
+
+  .banner{
+    background: linear-gradient(135deg,#2a005a,#a200ff,#ff3f8c);
+    padding:36px 32px 50px;
+    position:relative;
+    color:#fff;
+  }
+
+  .banner img{
+    max-width:85px;
+    display:block;
+    margin-bottom:12px;
+  }
+
+  .brand{
+    font-size:22px;
+    font-weight:700;
+    letter-spacing:.4px;
+  }
+
+  .content{
+    background:#ffffff;
+    padding:32px;
+    font-size:15px;
+    line-height:1.55;
+    color:#111;
+  }
+
+  .section{
+    margin:28px 0;
+    border-left:4px solid #a200ff;
+    padding:10px 18px;
+    background:#faf7ff;
+  }
+
+  .row{
+    margin-bottom:6px;
+    font-size:14px;
+  }
+
+  .label{
+    font-weight:600;
+  }
+
+  .footer{
+    padding:18px 32px;
+    font-size:13px;
+    background:#f2f2f2;
+    color:#444;
+    border-top:1px solid #ddd;
+  }
+
+</style>
+</head>
+
+<body>
+  <div class="outer">
+
+    <div class="card">
+
+      <!-- TOP BRAND GRAPHIC -->
+      <div class="banner">
+        <img src="https://i.imgur.com/jRMNpeh.jpg" alt="Internet Records Logo"/>
+        <div class="brand">Internet Records</div>
+      </div>
+
+      <!-- MAIN BODY -->
+      <div class="content">
+        <p>Hello {{user_name}},</p>
+        <p>Your submission is approved. It will be published on supported platforms within <strong>48 hours</strong>.</p>
+
+        <!-- INFO BLOCK -->
+        <div class="section">
+          <div class="row"><span class="label">Approval Date:</span> {{date}}</div>
+          <div class="row"><span class="label">Song Name:</span> {{song_name}}</div>
+          <div class="row"><span class="label">Singer:</span> {{singer_name}}</div>
+          <div class="row"><span class="label">Publisher:</span> Internet Records</div>
+          <div class="row"><span class="label">Status:</span> Approved</div>
+        </div>
+
+        <p>If any information needs correction, reply with updated details.</p>
+        <p>You will be notified once the track becomes publicly available.</p>
+      </div>
+
+      <!-- FOOTER -->
+      <div class="footer">
+        This message relates to your recent submission.
+      </div>
+
+    </div>
+
+  </div>
+</body>
+</html>

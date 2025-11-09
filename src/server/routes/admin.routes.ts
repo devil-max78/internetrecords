@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { db } from '../db';
 import { authMiddleware, adminMiddleware } from '../middleware/auth';
 import { generateDownloadUrl } from '../storage';
+import { sendStatusUpdateEmail, formatStatusForEmail } from '../email';
 
 const router = Router();
 
@@ -17,8 +18,33 @@ router.post('/releases/:id/approve', async (req, res) => {
     const release = await db.release.update({
       where: { id },
       data: { status: 'APPROVED' },
-      include: { tracks: true },
+      include: { 
+        tracks: true,
+        user: {
+          select: {
+            name: true,
+            email: true,
+          },
+        },
+      },
     });
+
+    // Send email notification
+    if (release.user && release.tracks.length > 0) {
+      const firstTrack = release.tracks[0];
+      await sendStatusUpdateEmail({
+        user_name: release.user.name || 'Artist',
+        user_email: release.user.email,
+        song_name: firstTrack.title || release.title,
+        singer_name: release.user.name || 'Unknown Artist',
+        song_status: formatStatusForEmail('APPROVED'),
+        date: new Date().toLocaleDateString('en-US', { 
+          year: 'numeric', 
+          month: 'long', 
+          day: 'numeric' 
+        }),
+      });
+    }
 
     res.json(release);
   } catch (error) {
@@ -35,8 +61,33 @@ router.post('/releases/:id/reject', async (req, res) => {
     const release = await db.release.update({
       where: { id },
       data: { status: 'REJECTED' },
-      include: { tracks: true },
+      include: { 
+        tracks: true,
+        user: {
+          select: {
+            name: true,
+            email: true,
+          },
+        },
+      },
     });
+
+    // Send email notification
+    if (release.user && release.tracks.length > 0) {
+      const firstTrack = release.tracks[0];
+      await sendStatusUpdateEmail({
+        user_name: release.user.name || 'Artist',
+        user_email: release.user.email,
+        song_name: firstTrack.title || release.title,
+        singer_name: release.user.name || 'Unknown Artist',
+        song_status: formatStatusForEmail('REJECTED'),
+        date: new Date().toLocaleDateString('en-US', { 
+          year: 'numeric', 
+          month: 'long', 
+          day: 'numeric' 
+        }),
+      });
+    }
 
     res.json(release);
   } catch (error) {
@@ -53,8 +104,33 @@ router.post('/releases/:id/distribute', async (req, res) => {
     const release = await db.release.update({
       where: { id },
       data: { status: 'DISTRIBUTED' },
-      include: { tracks: true },
+      include: { 
+        tracks: true,
+        user: {
+          select: {
+            name: true,
+            email: true,
+          },
+        },
+      },
     });
+
+    // Send email notification
+    if (release.user && release.tracks.length > 0) {
+      const firstTrack = release.tracks[0];
+      await sendStatusUpdateEmail({
+        user_name: release.user.name || 'Artist',
+        user_email: release.user.email,
+        song_name: firstTrack.title || release.title,
+        singer_name: release.user.name || 'Unknown Artist',
+        song_status: formatStatusForEmail('DISTRIBUTED'),
+        date: new Date().toLocaleDateString('en-US', { 
+          year: 'numeric', 
+          month: 'long', 
+          day: 'numeric' 
+        }),
+      });
+    }
 
     res.json(release);
   } catch (error) {

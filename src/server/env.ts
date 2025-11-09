@@ -21,6 +21,10 @@ const envSchema = z.object({
   // Database
   DATABASE_URL: z.string(),
   
+  // EmailJS (optional for email notifications)
+  EMAILJS_SERVICE_ID: z.string().optional(),
+  EMAILJS_TEMPLATE_ID: z.string().optional(),
+  EMAILJS_PRIVATE_KEY: z.string().optional(),
 
 });
 

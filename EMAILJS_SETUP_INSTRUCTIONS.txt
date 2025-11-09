@@ -1,0 +1,94 @@
+===============================================
+EmailJS Setup Instructions for Internet Records
+===============================================
+
+This guide will help you set up email notifications for release status updates.
+
+STEP 1: Create EmailJS Account
+-------------------------------
+1. Go to https://www.emailjs.com/
+2. Sign up for a free account
+3. Verify your email address
+
+STEP 2: Add Email Service
+--------------------------
+1. In EmailJS dashboard, go to "Email Services"
+2. Click "Add New Service"
+3. Choose your email provider (Gmail, Outlook, etc.)
+4. Follow the connection instructions
+5. Note down your SERVICE_ID (e.g., service_abc123)
+
+STEP 3: Create Email Template
+------------------------------
+1. Go to "Email Templates" in the dashboard
+2. Click "Create New Template"
+3. Copy and paste the HTML template provided below
+4. Configure template settings:
+   - Template Name: "Release Status Update"
+   - From Name: Internet Records
+   - From Email: your-noreply@domain.com
+   - To Email: {{to_email}}
+   - Subject: Your Music Submission Status Update - {{song_status}}
+
+5. In the content section, paste the HTML template (see below)
+6. Note down your TEMPLATE_ID (e.g., template_xyz789)
+
+STEP 4: Get Public Key
+-----------------------
+1. Go to "Account" > "General"
+2. Find your "Public Key"
+3. Copy it (e.g., your_public_key_here)
+
+STEP 5: Update Environment Variables
+-------------------------------------
+Add these three variables to your .env file:
+
+EMAILJS_SERVICE_ID=service_abc123
+EMAILJS_TEMPLATE_ID=template_xyz789
+EMAILJS_PUBLIC_KEY=your_public_key_here
+
+For Vercel deployment, add these in:
+Project Settings > Environment Variables
+
+STEP 6: Configure Template Variables
+-------------------------------------
+In your EmailJS template, use these variables:
+- {{user_name}} - Artist's name
+- {{to_email}} - Artist's email (use this in "To Email" field)
+- {{song_name}} - Song/track title
+- {{singer_name}} - Artist/singer name
+- {{song_status}} - Status (Approved ✅, Rejected ❌, etc.)
+- {{date}} - Date of status change
+
+HTML TEMPLATE TO USE IN EMAILJS:
+=================================
+(Copy the HTML template provided separately - the one with Internet Records branding)
+
+The template includes:
+- Header with Internet Records logo/branding
+- Personalized greeting with {{user_name}}
+- Status update with {{song_status}}
+- Song details ({{song_name}}, {{singer_name}})
+- Approval date ({{date}})
+- Professional footer
+
+TESTING:
+========
+1. After setup, save your .env file
+2. Restart your server
+3. As admin, approve or reject a release
+4. Check the artist's email inbox
+5. You should receive a formatted status update email
+
+TROUBLESHOOTING:
+================
+- If emails don't send, check console logs for errors
+- Verify all three environment variables are set correctly
+- Ensure EmailJS service is properly connected
+- Check EmailJS dashboard for usage/quota limits
+- Make sure "To Email" field uses {{to_email}} variable
+
+Note: Email sending failures won't break the approve/reject functionality.
+The system will log errors but continue processing normally.
+
+===============================================
