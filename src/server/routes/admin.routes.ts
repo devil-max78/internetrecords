@@ -262,16 +262,19 @@ router.get('/releases/:id/metadata/csv', async (req, res) => {
       return res.status(404).json({ error: 'Release not found' });
     }
 
-    // Create CSV header
-    let csv = 'Track Title,Artist,Duration,Genre,Language,ISRC\n';
+    // Create CSV header with all track details
+    let csv = 'Track Title,Artist,Singer,Lyricist,Composer,Producer,Featuring,Duration,Genre,Language,ISRC,CRBT Start,CRBT End\n';
 
     // Add tracks to CSV
     for (const track of release.tracks) {
       const duration = track.duration
         ? `${Math.floor(track.duration / 60)}:${(track.duration % 60).toString().padStart(2, '0')}`
         : '';
+      
+      const crbtStart = track.crbtStartTime ? `${track.crbtStartTime}s` : '';
+      const crbtEnd = track.crbtEndTime ? `${track.crbtEndTime}s` : '';
 
-      csv += `"${track.title}","${release.user.name}","${duration}","${track.genre || ''}","${track.language || ''}","${track.isrc || ''}"\n`;
+      csv += `"${track.title}","${release.user.name}","${track.singer || ''}","${track.lyricist || ''}","${track.composer || ''}","${track.producer || ''}","${track.featuring || ''}","${duration}","${track.genre || ''}","${track.language || ''}","${track.isrc || ''}","${crbtStart}","${crbtEnd}"\n`;
     }
 
     res.setHeader('Content-Type', 'text/csv');
