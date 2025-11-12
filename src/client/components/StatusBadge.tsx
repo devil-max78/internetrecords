@@ -1,7 +1,7 @@
 import React from 'react';
 
 type StatusBadgeProps = {
-  status: 'DRAFT' | 'UNDER_REVIEW' | 'APPROVED' | 'REJECTED' | 'DISTRIBUTED';
+  status: 'DRAFT' | 'UNDER_REVIEW' | 'APPROVED' | 'REJECTED' | 'DISTRIBUTED' | 'RESUBMITTED';
 };
 
 const StatusBadge: React.FC<StatusBadgeProps> = ({ status }) => {
@@ -11,6 +11,8 @@ const StatusBadge: React.FC<StatusBadgeProps> = ({ status }) => {
         return 'bg-gray-100 text-gray-800';
       case 'UNDER_REVIEW':
         return 'bg-yellow-100 text-yellow-800';
+      case 'RESUBMITTED':
+        return 'bg-blue-100 text-blue-800';
       case 'APPROVED':
         return 'bg-green-100 text-green-800';
       case 'REJECTED':
@@ -28,6 +30,8 @@ const StatusBadge: React.FC<StatusBadgeProps> = ({ status }) => {
         return 'Draft';
       case 'UNDER_REVIEW':
         return 'Under Review';
+      case 'RESUBMITTED':
+        return 'Resubmitted';
       case 'APPROVED':
         return 'Approved';
       case 'REJECTED':

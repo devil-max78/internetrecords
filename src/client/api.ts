@@ -107,9 +107,10 @@ export const api = {
         method: 'POST',
       }),
     
-    rejectRelease: (id: string) =>
+    rejectRelease: (id: string, rejectionReason: string, allowResubmission: boolean) =>
       fetchAPI(`/admin/releases/${id}/reject`, {
         method: 'POST',
+        body: JSON.stringify({ rejectionReason, allowResubmission }),
       }),
     
     distributeRelease: (id: string) =>
@@ -327,6 +328,36 @@ export const api = {
       fetchAPI('/label-publisher/user-preferences', {
         method: 'PUT',
         body: JSON.stringify(data),
+      }),
+  },
+
+  // Artist Profile Linking
+  artistProfileLinking: {
+    create: (data: {
+      artistName: string;
+      email: string;
+      instagramUrl?: string;
+      youtubeUrl?: string;
+      facebookUrl?: string;
+      spotifyUrl?: string;
+      appleMusicUrl?: string;
+      isrcCode?: string;
+      additionalNotes?: string;
+    }) =>
+      fetchAPI('/artist-profile-linking', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }),
+    
+    getAll: () => fetchAPI('/artist-profile-linking'),
+    
+    // Admin endpoints
+    getAllAdmin: () => fetchAPI('/artist-profile-linking/admin/all'),
+    
+    updateStatus: (id: string, status: string, adminNotes?: string) =>
+      fetchAPI(`/artist-profile-linking/admin/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ status, adminNotes }),
       }),
   },
 };

@@ -33,6 +33,9 @@ const Navbar: React.FC = () => {
               <Link to="/social-media-linking" className="hover:text-indigo-200 transition">
                 Social Media
               </Link>
+              <Link to="/artist-profile-linking" className="hover:text-indigo-200 transition">
+                Artist Profiles
+              </Link>
               {user?.role === 'ADMIN' && (
                 <Link to="/admin" className="hover:text-indigo-200 transition">
                   Admin

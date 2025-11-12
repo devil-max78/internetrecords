@@ -64,19 +64,24 @@ function DashboardComponent() {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {releases?.map((release) => (
+          {releases?.map((release: any) => (
             <Link
               key={release.id}
               to="/release/$releaseId"
               params={{ releaseId: release.id }}
               className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition"
             >
-              <div className="h-40 bg-gradient-to-r from-indigo-500 to-purple-500 flex items-center justify-center">
+              <div className="h-48 bg-gradient-to-r from-indigo-500 to-purple-500 flex items-center justify-center overflow-hidden">
                 {release.artworkUrl ? (
                   <img
-                    src={`http://localhost:9000/music-distribution/${release.artworkUrl}`}
+                    src={release.artworkUrl}
                     alt={release.title}
                     className="h-full w-full object-cover"
+                    onError={(e) => {
+                      // Fallback if image fails to load
+                      e.currentTarget.style.display = 'none';
+                      e.currentTarget.parentElement!.innerHTML = '<div class="text-white text-xl font-bold">No Artwork</div>';
+                    }}
                   />
                 ) : (
                   <div className="text-white text-xl font-bold">No Artwork</div>
@@ -87,6 +92,25 @@ function DashboardComponent() {
                   <h2 className="text-xl font-semibold text-gray-800 mb-2">{release.title}</h2>
                   <StatusBadge status={release.status} />
                 </div>
+                
+                {/* Show rejection reason if rejected */}
+                {release.status === 'REJECTED' && release.rejectionReason && (
+                  <div className="mb-3 p-3 bg-red-50 border border-red-200 rounded-md">
+                    <p className="text-sm font-medium text-red-800 mb-1">Rejection Reason:</p>
+                    <p className="text-sm text-red-700">{release.rejectionReason}</p>
+                    {release.allowResubmission && (
+                      <p className="text-xs text-red-600 mt-2">
+                        ✓ You can edit and resubmit this release
+                      </p>
+                    )}
+                    {!release.allowResubmission && (
+                      <p className="text-xs text-red-600 mt-2">
+                        ✗ Resubmission not allowed. Please contact support.
+                      </p>
+                    )}
+                  </div>
+                )}
+                
                 <p className="text-gray-600 text-sm mb-2">
                   {release.tracks.length} tracks
                 </p>

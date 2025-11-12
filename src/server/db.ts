@@ -848,6 +848,52 @@ export const userPublisherOperations = {
   },
 };
 
+// Artist Profile Linking operations
+export const artistProfileLinkingOperations = {
+  create: async (options: any) => {
+    const data = options.data || options;
+    const snakeData = toSnakeCase(data);
+
+    const { data: newRequest, error } = await supabase
+      .from('artist_profile_linking_requests')
+      .insert(snakeData)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return toCamelCase(newRequest);
+  },
+
+  findMany: async (options: any = {}) => {
+    let query = supabase.from('artist_profile_linking_requests').select('*').order('created_at', { ascending: false });
+
+    if (options.where) {
+      const snakeWhere = toSnakeCase(options.where);
+      query = query.match(snakeWhere);
+    }
+
+    const { data, error } = await query;
+    if (error) throw error;
+    return data ? data.map(toCamelCase) : [];
+  },
+
+  update: async (options: any) => {
+    const { where, data } = options;
+    const snakeWhere = toSnakeCase(where);
+    const snakeData = toSnakeCase(data);
+
+    const { data: updated, error } = await supabase
+      .from('artist_profile_linking_requests')
+      .update(snakeData)
+      .match(snakeWhere)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return toCamelCase(updated);
+  },
+};
+
 // Export a db object that mimics Prisma's structure
 export const db = {
   user: userOperations,
@@ -865,6 +911,7 @@ export const db = {
   globalSettings: globalSettingsOperations,
   userLabel: userLabelOperations,
   userPublisher: userPublisherOperations,
+  artistProfileLinking: artistProfileLinkingOperations,
   $disconnect: disconnect
 };
 

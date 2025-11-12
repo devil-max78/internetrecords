@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { db } from '../db';
 import { authMiddleware } from '../middleware/auth';
+import { generateDownloadUrl } from '../storage';
 
 const router = Router();
 
@@ -74,7 +75,30 @@ router.get('/', async (req, res) => {
       },
     });
 
-    res.json(releases);
+    // Generate signed URLs for artwork
+    const releasesWithUrls = await Promise.all(
+      releases.map(async (release) => {
+        let artworkSignedUrl = null;
+        if (release.artworkUrl) {
+          try {
+            artworkSignedUrl = await generateDownloadUrl(release.artworkUrl, 3600);
+          } catch (error: any) {
+            // File doesn't exist in storage, set to null
+            if (error.statusCode === '404') {
+              console.warn(`Artwork file not found for release ${release.id}: ${release.artworkUrl}`);
+            } else {
+              console.error('Error generating artwork URL:', error);
+            }
+          }
+        }
+        return {
+          ...release,
+          artworkUrl: artworkSignedUrl, // Return null if file doesn't exist
+        };
+      })
+    );
+
+    res.json(releasesWithUrls);
   } catch (error) {
     console.error('Get releases error:', error);
     res.status(500).json({ error: 'Internal server error' });
@@ -112,7 +136,25 @@ router.get('/:id', async (req, res) => {
       return res.status(403).json({ error: 'You do not have access to this release' });
     }
 
-    res.json(release);
+    // Generate signed URL for artwork
+    let artworkSignedUrl = null;
+    if (release.artworkUrl) {
+      try {
+        artworkSignedUrl = await generateDownloadUrl(release.artworkUrl, 3600);
+      } catch (error: any) {
+        // File doesn't exist in storage, set to null
+        if (error.statusCode === '404') {
+          console.warn(`Artwork file not found for release ${release.id}: ${release.artworkUrl}`);
+        } else {
+          console.error('Error generating artwork URL:', error);
+        }
+      }
+    }
+
+    res.json({
+      ...release,
+      artworkUrl: artworkSignedUrl, // Return null if file doesn't exist
+    });
   } catch (error) {
     console.error('Get release error:', error);
     res.status(500).json({ error: 'Internal server error' });
@@ -178,9 +220,16 @@ router.post('/:id/submit', async (req, res) => {
       return res.status(400).json({ error: 'Release must have at least one track' });
     }
 
+    // Determine status: RESUBMITTED if previously rejected, otherwise UNDER_REVIEW
+    const newStatus = release.status === 'REJECTED' ? 'RESUBMITTED' : 'UNDER_REVIEW';
+
     const updatedRelease = await db.release.update({
       where: { id },
-      data: { status: 'UNDER_REVIEW' },
+      data: { 
+        status: newStatus,
+        // Clear rejection reason when resubmitting
+        rejectionReason: newStatus === 'RESUBMITTED' ? null : release.rejectionReason,
+      },
       include: { tracks: true },
     });
 

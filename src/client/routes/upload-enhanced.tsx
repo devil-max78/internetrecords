@@ -106,14 +106,51 @@ function UploadEnhancedComponent() {
     if (file) {
       if (!file.type.match(/image\/(jpg|jpeg|png)/)) {
         toast.error('Please upload a JPG, JPEG, or PNG file');
+        e.target.value = '';
         return;
       }
-      setArtworkFile(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setArtworkPreview(reader.result as string);
+
+      // Check image dimensions
+      const img = new Image();
+      const objectUrl = URL.createObjectURL(file);
+      
+      img.onload = () => {
+        URL.revokeObjectURL(objectUrl);
+        
+        const width = img.width;
+        const height = img.height;
+        
+        // Validate dimensions: must be square and between 1600x1600 and 3000x3000
+        if (width !== height) {
+          toast.error('Album artwork must be square (equal width and height)');
+          e.target.value = '';
+          return;
+        }
+        
+        if (width < 1600 || width > 3000) {
+          toast.error('Album artwork must be between 1600x1600px and 3000x3000px');
+          e.target.value = '';
+          return;
+        }
+        
+        // Dimensions are valid, proceed with file
+        setArtworkFile(file);
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setArtworkPreview(reader.result as string);
+        };
+        reader.readAsDataURL(file);
+        
+        toast.success(`✓ Valid artwork: ${width}x${height}px`);
       };
-      reader.readAsDataURL(file);
+      
+      img.onerror = () => {
+        URL.revokeObjectURL(objectUrl);
+        toast.error('Failed to load image');
+        e.target.value = '';
+      };
+      
+      img.src = objectUrl;
     }
   };
 
@@ -124,7 +161,7 @@ function UploadEnhancedComponent() {
   };
 
   const addTrack = () => {
-    setTracks([...tracks, { title: '', duration: 0, genre: '', language: '', isrc: '' }]);
+    setTracks([...tracks, { title: '', genre: '', language: '', isrc: '' }]);
   };
 
   const updateTrack = (index: number, field: keyof TrackData, value: any) => {
@@ -198,9 +235,13 @@ function UploadEnhancedComponent() {
 
       // Add tracks
       for (const track of tracks) {
+        // Validate audio file is required
+        if (!track.audioFile) {
+          throw new Error(`Audio file is required for track: ${track.title}`);
+        }
+
         const trackData = {
           title: track.title,
-          duration: track.duration,
           genre: track.genre,
           language: track.language,
           isrc: track.isrc,
@@ -215,7 +256,7 @@ function UploadEnhancedComponent() {
 
         const createdTrack = await api.releases.addTrack(release.id, trackData);
 
-        // Upload audio file if provided
+        // Upload audio file (now required)
         if (track.audioFile) {
           const audioUploadResponse = await api.upload.getPresignedUrl({
             fileType: 'AUDIO',
@@ -417,6 +458,12 @@ function UploadEnhancedComponent() {
         <div className="border-b pb-4">
           <h2 className="text-xl font-semibold mb-4">Inlay / Album Art *</h2>
           
+          <div className="bg-blue-50 border border-blue-200 rounded-md p-3 mb-4">
+            <p className="text-sm text-blue-800">
+              <strong>Requirements:</strong> Square image (equal width and height), minimum 1600x1600px, maximum 3000x3000px
+            </p>
+          </div>
+          
           <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
             {artworkPreview ? (
               <div>
@@ -444,7 +491,7 @@ function UploadEnhancedComponent() {
                     className="hidden"
                   />
                 </label>
-                <p className="text-sm text-gray-500 mt-2">(.jpg, .jpeg, .png)</p>
+                <p className="text-sm text-gray-500 mt-2">JPG, JPEG, or PNG (1600x1600px - 3000x3000px)</p>
               </div>
             )}
           </div>
@@ -536,19 +583,6 @@ function UploadEnhancedComponent() {
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     placeholder="Enter track title"
                     required
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Duration (seconds)
-                  </label>
-                  <input
-                    type="number"
-                    value={track.duration || ''}
-                    onChange={(e) => updateTrack(index, 'duration', parseInt(e.target.value) || 0)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                    placeholder="180"
                   />
                 </div>
                 
@@ -658,11 +692,12 @@ function UploadEnhancedComponent() {
                 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Audio File (MP3 only)
+                    Audio File (MP3 only) <span className="text-red-600">*</span>
                   </label>
                   <input
                     type="file"
                     accept=".mp3,audio/mpeg"
+                    required
                     onChange={(e) => {
                       const file = e.target.files?.[0];
                       if (file) {
@@ -679,6 +714,9 @@ function UploadEnhancedComponent() {
                   />
                   {track.audioFile && (
                     <p className="text-sm text-green-600 mt-1">✓ {track.audioFile.name}</p>
+                  )}
+                  {!track.audioFile && (
+                    <p className="text-sm text-red-600 mt-1">Audio file is required</p>
                   )}
                 </div>
               </div>

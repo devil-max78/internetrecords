@@ -10,10 +10,16 @@ import { useAuth } from '../context/AuthContext';
 
 type TrackFormData = {
   title: string;
-  duration?: number;
   genre?: string;
   language?: string;
   isrc?: string;
+  singer?: string;
+  lyricist?: string;
+  composer?: string;
+  producer?: string;
+  featuring?: string;
+  crbtStartTime?: number;
+  crbtEndTime?: number;
 };
 
 export const releaseDetailRoute = createRoute({
@@ -28,6 +34,7 @@ function ReleaseDetailComponent() {
   const queryClient = useQueryClient();
   const { user } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [audioFile, setAudioFile] = useState<File | null>(null);
   
   const { register, handleSubmit, reset, formState: { errors } } = useForm<TrackFormData>();
   
@@ -60,7 +67,43 @@ function ReleaseDetailComponent() {
   });
 
   const onAddTrack = async (data: TrackFormData) => {
-    addTrackMutation.mutate(data);
+    if (!audioFile) {
+      toast.error('Audio file is required');
+      return;
+    }
+
+    try {
+      // First, add the track
+      const createdTrack = await api.releases.addTrack(releaseId, data);
+
+      // Then upload the audio file
+      const audioUploadResponse = await api.upload.getPresignedUrl({
+        fileType: 'AUDIO',
+        fileName: audioFile.name,
+        releaseId: releaseId,
+      });
+
+      await fetch(audioUploadResponse.uploadUrl, {
+        method: 'PUT',
+        body: audioFile,
+        headers: {
+          'Content-Type': audioFile.type,
+        },
+      });
+
+      // Update track with audio URL
+      await api.upload.updateTrackAudio({
+        trackId: createdTrack.id,
+        audioUrl: audioUploadResponse.fileUrl,
+      });
+
+      queryClient.invalidateQueries({ queryKey: ['release', releaseId] });
+      reset();
+      setAudioFile(null);
+      toast.success('Track added successfully!');
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to add track');
+    }
   };
 
   const handleSubmitForReview = async () => {
@@ -91,6 +134,7 @@ function ReleaseDetailComponent() {
   }
 
   const canEdit = release.status === 'DRAFT';
+  const canEditRejected = release.status === 'REJECTED' && release.allowResubmission;
 
   return (
     <div className="max-w-4xl mx-auto">
@@ -111,6 +155,50 @@ function ReleaseDetailComponent() {
           </div>
           <StatusBadge status={release.status} />
         </div>
+
+        {/* Show rejection reason and edit button */}
+        {release.status === 'REJECTED' && release.rejectionReason && (
+          <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-md">
+            <p className="text-sm font-medium text-red-800 mb-2">Rejection Reason:</p>
+            <p className="text-sm text-red-700 mb-3">{release.rejectionReason}</p>
+            {release.allowResubmission ? (
+              <div className="space-y-3">
+                <div className="bg-yellow-50 border border-yellow-300 rounded p-3">
+                  <p className="text-sm font-medium text-yellow-800 mb-2">⚠️ Limited Editing Available</p>
+                  <p className="text-xs text-yellow-700 mb-2">
+                    You can edit basic release metadata, but for comprehensive changes (artwork, track credits, audio files), we recommend creating a new release.
+                  </p>
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => navigate({ to: '/release/$releaseId/edit', params: { releaseId: release.id } })}
+                    className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 text-sm"
+                  >
+                    Edit Basic Metadata
+                  </button>
+                  <button
+                    onClick={() => navigate({ to: '/upload' })}
+                    className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 text-sm"
+                  >
+                    Create New Release
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="mt-3 p-3 bg-gray-100 border border-gray-300 rounded">
+                <p className="text-sm text-gray-700">
+                  ✗ Resubmission not allowed. Please contact support or create a new release.
+                </p>
+                <button
+                  onClick={() => navigate({ to: '/upload' })}
+                  className="mt-2 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 text-sm"
+                >
+                  Create New Release
+                </button>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Tracks Section */}
@@ -143,7 +231,7 @@ function ReleaseDetailComponent() {
           <p className="text-gray-600 mb-6">No tracks added yet.</p>
         )}
 
-        {canEdit && (
+        {(canEdit || canEditRejected) && (
           <form onSubmit={handleSubmit(onAddTrack)} className="space-y-4 border-t pt-4">
             <h3 className="text-lg font-semibold text-gray-800">Add New Track</h3>
             
@@ -165,18 +253,74 @@ function ReleaseDetailComponent() {
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label htmlFor="duration" className="block text-sm font-medium text-gray-700 mb-1">
-                  Duration (seconds)
+                <label htmlFor="singer" className="block text-sm font-medium text-gray-700 mb-1">
+                  Singer
                 </label>
                 <input
-                  id="duration"
-                  type="number"
-                  {...register('duration', { valueAsNumber: true })}
+                  id="singer"
+                  type="text"
+                  {...register('singer')}
                   className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  placeholder="180"
+                  placeholder="Vocalist name"
                 />
               </div>
 
+              <div>
+                <label htmlFor="lyricist" className="block text-sm font-medium text-gray-700 mb-1">
+                  Lyricist
+                </label>
+                <input
+                  id="lyricist"
+                  type="text"
+                  {...register('lyricist')}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  placeholder="Lyrics writer"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label htmlFor="composer" className="block text-sm font-medium text-gray-700 mb-1">
+                  Composer
+                </label>
+                <input
+                  id="composer"
+                  type="text"
+                  {...register('composer')}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  placeholder="Music composer"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="producer" className="block text-sm font-medium text-gray-700 mb-1">
+                  Producer
+                </label>
+                <input
+                  id="producer"
+                  type="text"
+                  {...register('producer')}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  placeholder="Track producer"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label htmlFor="featuring" className="block text-sm font-medium text-gray-700 mb-1">
+                Featuring
+              </label>
+              <input
+                id="featuring"
+                type="text"
+                {...register('featuring')}
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                placeholder="Featured artists"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
               <div>
                 <label htmlFor="genre" className="block text-sm font-medium text-gray-700 mb-1">
                   Genre
@@ -189,11 +333,94 @@ function ReleaseDetailComponent() {
                   placeholder="Pop, Rock, etc."
                 />
               </div>
+
+              <div>
+                <label htmlFor="language" className="block text-sm font-medium text-gray-700 mb-1">
+                  Language
+                </label>
+                <input
+                  id="language"
+                  type="text"
+                  {...register('language')}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  placeholder="English, Hindi, etc."
+                />
+              </div>
+            </div>
+
+            <div>
+              <label htmlFor="isrc" className="block text-sm font-medium text-gray-700 mb-1">
+                ISRC
+              </label>
+              <input
+                id="isrc"
+                type="text"
+                {...register('isrc')}
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                placeholder="ISRC code"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label htmlFor="crbtStartTime" className="block text-sm font-medium text-gray-700 mb-1">
+                  CRBT Start (seconds)
+                </label>
+                <input
+                  id="crbtStartTime"
+                  type="number"
+                  {...register('crbtStartTime', { valueAsNumber: true })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  placeholder="30"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="crbtEndTime" className="block text-sm font-medium text-gray-700 mb-1">
+                  CRBT End (seconds)
+                </label>
+                <input
+                  id="crbtEndTime"
+                  type="number"
+                  {...register('crbtEndTime', { valueAsNumber: true })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  placeholder="60"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Audio File (MP3 only) <span className="text-red-600">*</span>
+              </label>
+              <input
+                type="file"
+                accept=".mp3,audio/mpeg"
+                required
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    if (!file.name.toLowerCase().endsWith('.mp3') && file.type !== 'audio/mpeg') {
+                      toast.error('Only MP3 files are allowed');
+                      e.target.value = '';
+                      return;
+                    }
+                    setAudioFile(file);
+                  }
+                }}
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
+              {audioFile && (
+                <p className="text-sm text-green-600 mt-1">✓ {audioFile.name}</p>
+              )}
+              {!audioFile && (
+                <p className="text-sm text-red-600 mt-1">Audio file is required</p>
+              )}
             </div>
 
             <button
               type="submit"
-              disabled={addTrackMutation.isPending}
+              disabled={addTrackMutation.isPending || !audioFile}
               className="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 transition disabled:opacity-70"
             >
               {addTrackMutation.isPending ? 'Adding...' : 'Add Track'}
@@ -203,18 +430,24 @@ function ReleaseDetailComponent() {
       </div>
 
       {/* Submit for Review */}
-      {canEdit && (
+      {(canEdit || canEditRejected) && (
         <div className="bg-white rounded-lg shadow-md p-6">
-          <h2 className="text-xl font-semibold text-gray-800 mb-4">Submit for Review</h2>
+          <h2 className="text-xl font-semibold text-gray-800 mb-4">
+            {canEditRejected ? 'Resubmit for Review' : 'Submit for Review'}
+          </h2>
           <p className="text-gray-600 mb-4">
-            Once you're done adding tracks, submit your release for admin review.
+            {canEditRejected
+              ? 'After making the necessary changes, resubmit your release for admin review.'
+              : 'Once you\'re done adding tracks, submit your release for admin review.'}
           </p>
           <button
             onClick={handleSubmitForReview}
             disabled={submitForReviewMutation.isPending || !release.tracks || release.tracks.length === 0}
             className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-2 px-6 rounded-md hover:from-indigo-700 hover:to-purple-700 transition disabled:opacity-70"
           >
-            {submitForReviewMutation.isPending ? 'Submitting...' : 'Submit for Review'}
+            {submitForReviewMutation.isPending 
+              ? (canEditRejected ? 'Resubmitting...' : 'Submitting...') 
+              : (canEditRejected ? 'Resubmit for Review' : 'Submit for Review')}
           </button>
         </div>
       )}

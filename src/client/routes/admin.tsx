@@ -18,6 +18,10 @@ function AdminComponent() {
   const queryClient = useQueryClient();
   const [selectedReleaseId, setSelectedReleaseId] = useState<string | null>(null);
   const [playingTrackId, setPlayingTrackId] = useState<string | null>(null);
+  const [showRejectDialog, setShowRejectDialog] = useState(false);
+  const [rejectingReleaseId, setRejectingReleaseId] = useState<string | null>(null);
+  const [rejectionReason, setRejectionReason] = useState('');
+  const [allowResubmission, setAllowResubmission] = useState(true);
   
   const { data: releases, isLoading } = useQuery({
     queryKey: ['releases'],
@@ -42,9 +46,14 @@ function AdminComponent() {
   });
   
   const rejectMutation = useMutation({
-    mutationFn: (id: string) => api.admin.rejectRelease(id),
+    mutationFn: ({ id, rejectionReason, allowResubmission }: { id: string; rejectionReason: string; allowResubmission: boolean }) => 
+      api.admin.rejectRelease(id, rejectionReason, allowResubmission),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['releases'] });
+      setShowRejectDialog(false);
+      setRejectingReleaseId(null);
+      setRejectionReason('');
+      setAllowResubmission(true);
       toast.success('Release rejected');
     },
     onError: (error: any) => {
@@ -90,7 +99,21 @@ function AdminComponent() {
   };
 
   const handleReject = (releaseId: string) => {
-    rejectMutation.mutate(releaseId);
+    setRejectingReleaseId(releaseId);
+    setShowRejectDialog(true);
+  };
+
+  const confirmReject = () => {
+    if (!rejectingReleaseId) return;
+    if (!rejectionReason.trim()) {
+      toast.error('Please provide a rejection reason');
+      return;
+    }
+    rejectMutation.mutate({
+      id: rejectingReleaseId,
+      rejectionReason: rejectionReason.trim(),
+      allowResubmission,
+    });
   };
   
   const handleDeleteRelease = (releaseId: string, releaseTitle: string) => {
@@ -291,6 +314,12 @@ function AdminComponent() {
             className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition"
           >
             YouTube Claims
+          </a>
+          <a
+            href="/admin/artist-profile-linking"
+            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
+          >
+            Artist Profiles
           </a>
           <a
             href="/admin/settings"
@@ -516,6 +545,63 @@ function AdminComponent() {
                     </div>
                   );
                 })}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Rejection Dialog */}
+      {showRejectDialog && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <h3 className="text-xl font-bold mb-4">Reject Release</h3>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Rejection Reason *
+                </label>
+                <textarea
+                  value={rejectionReason}
+                  onChange={(e) => setRejectionReason(e.target.value)}
+                  placeholder="Explain why this release is being rejected..."
+                  rows={4}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+                />
+              </div>
+
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  id="allowResubmission"
+                  checked={allowResubmission}
+                  onChange={(e) => setAllowResubmission(e.target.checked)}
+                  className="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 rounded"
+                />
+                <label htmlFor="allowResubmission" className="ml-2 block text-sm text-gray-900">
+                  Allow user to edit and resubmit
+                </label>
+              </div>
+
+              <div className="flex gap-3 mt-6">
+                <button
+                  onClick={() => {
+                    setShowRejectDialog(false);
+                    setRejectingReleaseId(null);
+                    setRejectionReason('');
+                    setAllowResubmission(true);
+                  }}
+                  className="flex-1 px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={confirmReject}
+                  disabled={rejectMutation.isPending || !rejectionReason.trim()}
+                  className="flex-1 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {rejectMutation.isPending ? 'Rejecting...' : 'Confirm Reject'}
+                </button>
               </div>
             </div>
           </div>

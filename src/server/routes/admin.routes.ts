@@ -58,10 +58,16 @@ router.post('/releases/:id/approve', async (req, res) => {
 router.post('/releases/:id/reject', async (req, res) => {
   try {
     const { id } = req.params;
+    const { rejectionReason, allowResubmission } = req.body;
 
     const release = await db.release.update({
       where: { id },
-      data: { status: 'REJECTED' },
+      data: { 
+        status: 'REJECTED',
+        rejectionReason: rejectionReason || 'Your submission did not meet our quality standards.',
+        allowResubmission: allowResubmission !== false, // Default to true
+        rejectedAt: new Date().toISOString(),
+      },
       include: { 
         tracks: true,
         user: {
@@ -73,16 +79,20 @@ router.post('/releases/:id/reject', async (req, res) => {
       },
     });
 
-    // Send email notification
+    // Send email notification with rejection reason
     if (release.user && release.tracks.length > 0) {
       const firstTrack = release.tracks[0];
+      const statusMessage = allowResubmission !== false
+        ? `Your submission was rejected. Reason: ${rejectionReason || 'Quality standards not met'}. You can edit and resubmit your track.`
+        : `Your submission was rejected. Reason: ${rejectionReason || 'Quality standards not met'}. Please contact support for more information.`;
+      
       await sendStatusUpdateEmail({
         user_name: release.user.name || 'Artist',
         user_email: release.user.email,
         song_name: firstTrack.title || release.title,
         singer_name: release.user.name || 'Unknown Artist',
         song_status: formatStatusForEmail('REJECTED'),
-        status_message: getStatusMessage('REJECTED'),
+        status_message: statusMessage,
         date: new Date().toLocaleDateString('en-US', { 
           year: 'numeric', 
           month: 'long', 

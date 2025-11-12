@@ -19,6 +19,9 @@ import { adminYoutubeClaimsRoute } from './routes/admin-youtube-claims';
 import { youtubeOacRoute } from './routes/youtube-oac';
 import { socialMediaLinkingRoute } from './routes/social-media-linking';
 import { labelPublisherSettingsRoute } from './routes/label-publisher-settings';
+import { editReleaseRoute } from './routes/edit-release';
+import { artistProfileLinkingRoute } from './routes/artist-profile-linking';
+import { adminArtistProfileLinkingRoute } from './routes/admin-artist-profile-linking';
 
 // Create query client outside component
 const queryClient = new QueryClient({
@@ -46,6 +49,9 @@ const routeTree = rootRoute.addChildren([
   youtubeOacRoute,
   socialMediaLinkingRoute,
   labelPublisherSettingsRoute,
+  editReleaseRoute,
+  artistProfileLinkingRoute,
+  adminArtistProfileLinkingRoute,
 ]);
 
 const router = createRouter({ 

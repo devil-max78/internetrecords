@@ -15,6 +15,7 @@ import youtubeClaimRoutes from './routes/youtube-claim.routes';
 import youtubeOacRoutes from './routes/youtube-oac.routes';
 import socialMediaLinkingRoutes from './routes/social-media-linking.routes';
 import labelPublisherRoutes from './routes/label-publisher.routes';
+import artistProfileLinkingRoutes from './routes/artist-profile-linking.routes';
 
 // Initialize Express app
 const app = express();
@@ -38,6 +39,7 @@ app.use('/api/youtube-claims', youtubeClaimRoutes);
 app.use('/api/youtube-oac', youtubeOacRoutes);
 app.use('/api/social-media-linking', socialMediaLinkingRoutes);
 app.use('/api/label-publisher', labelPublisherRoutes);
+app.use('/api/artist-profile-linking', artistProfileLinkingRoutes);
 
 // Health check endpoint
 app.get('/api/health', (_req, res) => {
