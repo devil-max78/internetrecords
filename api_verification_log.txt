@@ -1,0 +1,42 @@
+scripts/check-supabase-health.ts(4,1): error TS6133: 'path' is declared but its value is never read.
+scripts/check-supabase-health.ts(32,21): error TS6133: 'data' is declared but its value is never read.
+scripts/create-supabase-admin.ts(33,49): error TS2339: Property 'email' does not exist on type 'never'.
+scripts/verify-custom-label-flow.ts(3,1): error TS6133: 'path' is declared but its value is never read.
+scripts/verify-custom-label-flow.ts(9,7): error TS6133: 'supabaseKey' is declared but its value is never read.
+scripts/verify-db-fix.ts(4,1): error TS6133: 'path' is declared but its value is never read.
+src/client/App.tsx(57,29): error TS2345: Argument of type '{ routeTree: Route<Register, any, "/", "/", string, "__root__", undefined, {}, {}, AnyContext, AnyContext, {}, undefined, readonly [Route<unknown, RootRoute<Register, ... 10 more ..., undefined>, ... 15 more ..., undefined>, ... 14 more ..., Route<...>], unknown, unknown, unknown, undefined>; defaultPreload: string;...' is not assignable to parameter of type '"strictNullChecks must be enabled in tsconfig.json"'.
+src/client/index.tsx(1,1): error TS6133: 'React' is declared but its value is never read.
+src/client/routes/admin.tsx(1,8): error TS6133: 'React' is declared but its value is never read.
+src/client/routes/admin.tsx(20,10): error TS6133: 'playingTrackId' is declared but its value is never read.
+src/client/routes/dashboard.tsx(1,1): error TS6133: 'React' is declared but its value is never read.
+src/client/routes/dashboard.tsx(17,9): error TS6133: 'user' is declared but its value is never read.
+src/client/routes/dashboard.tsx(71,25): error TS2353: Object literal may only specify known properties, and 'releaseId' does not exist in type 'ParamsReducerFn<RouterCore<AnyRoute, "never", false, RouterHistory, Record<string, any>>, "PATH", string, "/release/$releaseId">'.
+src/client/routes/edit-release.tsx(49,10): error TS6133: 'artworkFile' is declared but its value is never read.
+src/client/routes/edit-release.tsx(50,10): error TS6133: 'artworkPreview' is declared but its value is never read.
+src/client/routes/edit-release.tsx(121,9): error TS6133: 'updateTrack' is declared but its value is never read.
+src/client/routes/edit-release.tsx(127,9): error TS6133: 'addTrack' is declared but its value is never read.
+src/client/routes/edit-release.tsx(131,9): error TS6133: 'removeTrack' is declared but its value is never read.
+src/client/routes/edit-release.tsx(135,9): error TS6133: 'handleArtworkChange' is declared but its value is never read.
+src/client/routes/edit-release.tsx(152,55): error TS2353: Object literal may only specify known properties, and 'releaseId' does not exist in type 'ParamsReducerFn<RouterCore<AnyRoute, "never", false, RouterHistory, Record<string, any>>, "PATH", string, "/release/$releaseId">'.
+src/client/routes/edit-release.tsx(187,76): error TS2353: Object literal may only specify known properties, and 'releaseId' does not exist in type 'ParamsReducerFn<RouterCore<AnyRoute, "never", false, RouterHistory, Record<string, any>>, "PATH", string, "/release/$releaseId">'.
+src/client/routes/edit-release.tsx(200,72): error TS2353: Object literal may only specify known properties, and 'releaseId' does not exist in type 'ParamsReducerFn<RouterCore<AnyRoute, "never", false, RouterHistory, Record<string, any>>, "PATH", string, "/release/$releaseId">'.
+src/client/routes/edit-release.tsx(351,76): error TS2353: Object literal may only specify known properties, and 'releaseId' does not exist in type 'ParamsReducerFn<RouterCore<AnyRoute, "never", false, RouterHistory, Record<string, any>>, "PATH", string, "/release/$releaseId">'.
+src/client/routes/index.tsx(3,1): error TS6133: 'useAuth' is declared but its value is never read.
+src/client/routes/index.tsx(9,16): error TS6133: 'context' is declared but its value is never read.
+src/client/routes/login.tsx(1,1): error TS6133: 'React' is declared but its value is never read.
+src/client/routes/release-detail.tsx(1,8): error TS6133: 'React' is declared but its value is never read.
+src/client/routes/release-detail.tsx(35,9): error TS6133: 'user' is declared but its value is never read.
+src/client/routes/release-detail.tsx(36,10): error TS6133: 'isSubmitting' is declared but its value is never read.
+src/client/routes/release-detail.tsx(36,24): error TS6133: 'setIsSubmitting' is declared but its value is never read.
+src/client/routes/release-detail.tsx(41,37): error TS6133: 'refetch' is declared but its value is never read.
+src/client/routes/release-detail.tsx(174,89): error TS2353: Object literal may only specify known properties, and 'releaseId' does not exist in type 'ParamsReducerFn<RouterCore<AnyRoute, "never", false, RouterHistory, Record<string, any>>, "PATH", string, "/release/$releaseId/edit">'.
+src/client/routes/root.tsx(1,1): error TS6133: 'React' is declared but its value is never read.
+src/client/routes/signup.tsx(1,1): error TS6133: 'React' is declared but its value is never read.
+src/client/routes/upload-enhanced.tsx(98,9): error TS6133: 'createSubLabelMutation' is declared but its value is never read.
+src/client/routes/upload-enhanced.tsx(287,55): error TS2353: Object literal may only specify known properties, and 'releaseId' does not exist in type 'ParamsReducerFn<RouterCore<AnyRoute, "never", false, RouterHistory, Record<string, any>>, "PATH", string, "/release/$releaseId">'.
+src/client/routes/upload.tsx(1,8): error TS6133: 'React' is declared but its value is never read.
+src/client/routes/upload.tsx(32,55): error TS2353: Object literal may only specify known properties, and 'releaseId' does not exist in type 'ParamsReducerFn<RouterCore<AnyRoute, "never", false, RouterHistory, Record<string, any>>, "PATH", string, "/release/$releaseId">'.
+src/client/trpc.ts(4,32): error TS2307: Cannot find module '../server/routers/_app' or its corresponding type declarations.
+src/client/trpc.ts(20,32): error TS2339: Property 'createClient' does not exist on type '"The property 'useContext' in your router collides with a built-in method, rename this router or procedure on your backend." | "The property 'useUtils' in your router collides with a built-in method, rename this router or procedure on your backend." | "The property 'Provider' in your router collides with a built-in ...'.
+  Property 'createClient' does not exist on type '"The property 'useContext' in your router collides with a built-in method, rename this router or procedure on your backend."'.
+src/server/auth.ts(83,54): error TS2339: Property 'email' does not exist on type 'never'.

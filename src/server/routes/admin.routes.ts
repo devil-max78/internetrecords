@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { db } from '../db';
+import { supabase } from '../supabase';
 import { authMiddleware, adminMiddleware } from '../middleware/auth';
 import { generateDownloadUrl } from '../storage';
 import { sendStatusUpdateEmail, formatStatusForEmail, getStatusMessage } from '../email';
@@ -18,7 +19,7 @@ router.post('/releases/:id/approve', async (req, res) => {
     const release = await db.release.update({
       where: { id },
       data: { status: 'APPROVED' },
-      include: { 
+      include: {
         tracks: true,
         user: {
           select: {
@@ -39,10 +40,10 @@ router.post('/releases/:id/approve', async (req, res) => {
         singer_name: release.user.name || 'Unknown Artist',
         song_status: formatStatusForEmail('APPROVED'),
         status_message: getStatusMessage('APPROVED'),
-        date: new Date().toLocaleDateString('en-US', { 
-          year: 'numeric', 
-          month: 'long', 
-          day: 'numeric' 
+        date: new Date().toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
         }),
       });
     }
@@ -62,13 +63,13 @@ router.post('/releases/:id/reject', async (req, res) => {
 
     const release = await db.release.update({
       where: { id },
-      data: { 
+      data: {
         status: 'REJECTED',
         rejectionReason: rejectionReason || 'Your submission did not meet our quality standards.',
         allowResubmission: allowResubmission !== false, // Default to true
         rejectedAt: new Date().toISOString(),
       },
-      include: { 
+      include: {
         tracks: true,
         user: {
           select: {
@@ -85,7 +86,7 @@ router.post('/releases/:id/reject', async (req, res) => {
       const statusMessage = allowResubmission !== false
         ? `Your submission was rejected. Reason: ${rejectionReason || 'Quality standards not met'}. You can edit and resubmit your track.`
         : `Your submission was rejected. Reason: ${rejectionReason || 'Quality standards not met'}. Please contact support for more information.`;
-      
+
       await sendStatusUpdateEmail({
         user_name: release.user.name || 'Artist',
         user_email: release.user.email,
@@ -93,10 +94,10 @@ router.post('/releases/:id/reject', async (req, res) => {
         singer_name: release.user.name || 'Unknown Artist',
         song_status: formatStatusForEmail('REJECTED'),
         status_message: statusMessage,
-        date: new Date().toLocaleDateString('en-US', { 
-          year: 'numeric', 
-          month: 'long', 
-          day: 'numeric' 
+        date: new Date().toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
         }),
       });
     }
@@ -116,7 +117,7 @@ router.post('/releases/:id/distribute', async (req, res) => {
     const release = await db.release.update({
       where: { id },
       data: { status: 'DISTRIBUTED' },
-      include: { 
+      include: {
         tracks: true,
         user: {
           select: {
@@ -137,10 +138,10 @@ router.post('/releases/:id/distribute', async (req, res) => {
         singer_name: release.user.name || 'Unknown Artist',
         song_status: formatStatusForEmail('DISTRIBUTED'),
         status_message: getStatusMessage('DISTRIBUTED'),
-        date: new Date().toLocaleDateString('en-US', { 
-          year: 'numeric', 
-          month: 'long', 
-          day: 'numeric' 
+        date: new Date().toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
         }),
       });
     }
@@ -280,7 +281,7 @@ router.get('/releases/:id/metadata/csv', async (req, res) => {
       const duration = track.duration
         ? `${Math.floor(track.duration / 60)}:${(track.duration % 60).toString().padStart(2, '0')}`
         : '';
-      
+
       const crbtStart = track.crbtStartTime ? `${track.crbtStartTime}s` : '';
       const crbtEnd = track.crbtEndTime ? `${track.crbtEndTime}s` : '';
 
@@ -302,7 +303,7 @@ router.get('/releases/:id/metadata/csv', async (req, res) => {
 router.post('/publishers', async (req, res) => {
   try {
     const { name } = req.body;
-    
+
     if (!name) {
       return res.status(400).json({ error: 'Name is required' });
     }
@@ -322,7 +323,7 @@ router.post('/publishers', async (req, res) => {
 router.post('/album-categories', async (req, res) => {
   try {
     const { name } = req.body;
-    
+
     if (!name) {
       return res.status(400).json({ error: 'Name is required' });
     }
@@ -342,7 +343,7 @@ router.post('/album-categories', async (req, res) => {
 router.post('/content-types', async (req, res) => {
   try {
     const { name } = req.body;
-    
+
     if (!name) {
       return res.status(400).json({ error: 'Name is required' });
     }
@@ -362,15 +363,15 @@ router.post('/content-types', async (req, res) => {
 router.delete('/sub-labels/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    
+
     // Check if sub-label is being used by any releases
     const releases = await db.release.findMany({ where: { subLabelId: id } });
     if (releases && releases.length > 0) {
-      return res.status(400).json({ 
-        error: `Cannot delete: This sub-label is used by ${releases.length} release(s). Please remove it from those releases first.` 
+      return res.status(400).json({
+        error: `Cannot delete: This sub-label is used by ${releases.length} release(s). Please remove it from those releases first.`
       });
     }
-    
+
     await db.subLabel.delete({ where: { id } });
     res.json({ success: true, message: 'Sub-label deleted successfully' });
   } catch (error: any) {
@@ -386,15 +387,15 @@ router.delete('/sub-labels/:id', async (req, res) => {
 router.delete('/publishers/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    
+
     // Check if publisher is being used
     const releases = await db.release.findMany({ where: { publisherId: id } });
     if (releases && releases.length > 0) {
-      return res.status(400).json({ 
-        error: `Cannot delete: This publisher is used by ${releases.length} release(s)` 
+      return res.status(400).json({
+        error: `Cannot delete: This publisher is used by ${releases.length} release(s)`
       });
     }
-    
+
     await db.publisher.delete({ where: { id } });
     res.json({ success: true, message: 'Publisher deleted successfully' });
   } catch (error: any) {
@@ -410,15 +411,15 @@ router.delete('/publishers/:id', async (req, res) => {
 router.delete('/album-categories/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    
+
     // Check if category is being used
     const releases = await db.release.findMany({ where: { albumCategoryId: id } });
     if (releases && releases.length > 0) {
-      return res.status(400).json({ 
-        error: `Cannot delete: This category is used by ${releases.length} release(s)` 
+      return res.status(400).json({
+        error: `Cannot delete: This category is used by ${releases.length} release(s)`
       });
     }
-    
+
     await db.albumCategory.delete({ where: { id } });
     res.json({ success: true, message: 'Album category deleted successfully' });
   } catch (error: any) {
@@ -434,15 +435,15 @@ router.delete('/album-categories/:id', async (req, res) => {
 router.delete('/content-types/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    
+
     // Check if content type is being used
     const releases = await db.release.findMany({ where: { contentTypeId: id } });
     if (releases && releases.length > 0) {
-      return res.status(400).json({ 
-        error: `Cannot delete: This content type is used by ${releases.length} release(s)` 
+      return res.status(400).json({
+        error: `Cannot delete: This content type is used by ${releases.length} release(s)`
       });
     }
-    
+
     await db.contentType.delete({ where: { id } });
     res.json({ success: true, message: 'Content type deleted successfully' });
   } catch (error: any) {
@@ -453,21 +454,48 @@ router.delete('/content-types/:id', async (req, res) => {
     res.status(500).json({ error: 'Failed to delete content type' });
   }
 });
-
 // Create sub-label (admin only)
+// Get all sub-labels (admin only - shows all regardless of visibility)
+router.get('/sub-labels', async (_req, res) => {
+  try {
+    const subLabels = await db.subLabel.findMany({});
+    res.json(subLabels);
+  } catch (error: any) {
+    console.error('Get all sub-labels error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 router.post('/sub-labels', async (req, res) => {
   try {
-    const { name } = req.body;
+    const { name, userId, isGlobal } = req.body;
     
+    console.log('[DEBUG] Request body:', req.body);
+    console.log('[DEBUG] Creating sub-label - name:', name, 'userId:', userId, 'isGlobal:', isGlobal);
+
     if (!name) {
       return res.status(400).json({ error: 'Name is required' });
     }
 
-    const subLabel = await db.subLabel.create({ data: { name } });
+    // Determine if this should be a global or private label
+    // It's global if: isGlobal is explicitly true OR (isGlobal is not false AND no userId provided)
+    const shouldBeGlobal = isGlobal === true || (isGlobal !== false && !userId);
+    
+    const labelData: any = {
+      name: name.trim(),
+      isGlobal: shouldBeGlobal,
+      userId: shouldBeGlobal ? null : userId,
+    };
+
+    console.log('[DEBUG] Final label data:', labelData);
+
+    const subLabel = await db.subLabel.create({ data: labelData });
+    
+    console.log('[DEBUG] Created sub-label from DB:', subLabel);
+    
     res.status(201).json(subLabel);
   } catch (error: any) {
-    console.error('Create sub-label error:', error);
-    console.error('Error details:', error.message, error.code, error.details);
+    console.error('[ERROR] Create sub-label error:', error);
     if (error.code === '23505') {
       return res.status(409).json({ error: 'Sub-label already exists' });
     }
@@ -602,6 +630,33 @@ router.patch('/users/:id/role', async (req, res) => {
     res.json(user);
   } catch (error: any) {
     console.error('Update user role error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Delete user (admin only)
+router.delete('/users/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const adminId = req.user!.id;
+
+    // Prevent admin from deleting themselves
+    if (id === adminId) {
+      return res.status(400).json({ error: 'Cannot delete your own account' });
+    }
+
+    // Check if user exists
+    const user = await db.user.findUnique({ where: { id } });
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Delete user (cascade will handle related records)
+    await supabase.from('users').delete().eq('id', id);
+
+    res.json({ success: true, message: 'User deleted successfully' });
+  } catch (error: any) {
+    console.error('Delete user error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });

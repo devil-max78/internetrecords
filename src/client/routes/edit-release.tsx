@@ -5,6 +5,7 @@ import { toast } from 'react-hot-toast';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { rootRoute } from './root';
 import { api } from '../api';
+import { useAuth } from '../context/AuthContext';
 
 type ReleaseFormData = {
   title: string;
@@ -55,8 +56,10 @@ function EditReleaseComponent() {
     queryFn: () => api.releases.getById(releaseId),
   });
 
+  const { user } = useAuth();
+
   const { data: subLabels } = useQuery({
-    queryKey: ['subLabels'],
+    queryKey: ['subLabels', user?.id],
     queryFn: () => api.metadata.getSubLabels(),
   });
 
@@ -91,7 +94,7 @@ function EditReleaseComponent() {
         publisherId: release.publisherId,
         primaryArtistName: release.primaryArtistName,
       });
-      
+
       // Load existing tracks
       if (release.tracks && release.tracks.length > 0) {
         setTracks(release.tracks.map((track: any) => ({
@@ -110,7 +113,7 @@ function EditReleaseComponent() {
           existingAudioUrl: track.audioUrl,
         })));
       }
-      
+
       // Set existing artwork preview
       if (release.artworkUrl) {
         setArtworkPreview(release.artworkUrl);
@@ -174,9 +177,9 @@ function EditReleaseComponent() {
   }
 
   // Check if user can edit
-  const canEdit = release.status === 'DRAFT' || 
-                  release.status === 'UNDER_REVIEW' || 
-                  (release.status === 'REJECTED' && release.allowResubmission);
+  const canEdit = release.status === 'DRAFT' ||
+    release.status === 'UNDER_REVIEW' ||
+    (release.status === 'REJECTED' && release.allowResubmission);
 
   if (!canEdit) {
     return (

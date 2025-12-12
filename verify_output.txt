@@ -1,0 +1,35 @@
+Starting Custom Label Flow Verification...
+
+1. Creating test artist: test-artist-1765016682225@example.com
+   Artist created: 85667280-1711-4e6c-b630-2e1b8dc5df82
+   Manually inserting into public.users (trigger might have delayed or failed)
+   Manual insert success
+
+2. Artist requesting label: "Test Label 1765016682225"
+   Request created: {
+  id: 'cd116199-ca3d-45ed-b584-8a3b62d18234',
+  user_id: '85667280-1711-4e6c-b630-2e1b8dc5df82',
+  name: 'Test Label 1765016682225',
+  status: 'PENDING',
+  admin_notes: null,
+  created_at: '2025-12-06T10:24:45.215978+00:00',
+  updated_at: '2025-12-06T10:24:45.215978+00:00'
+}
+   Verified status is PENDING
+
+3. Admin approving request...
+   Request approved and sub-label created: {
+  id: '0a5fd468-de4b-4b34-b57b-76b07015ae69',
+  name: 'Test Label 1765016682225',
+  user_id: '85667280-1711-4e6c-b630-2e1b8dc5df82',
+  created_at: '2025-12-06T10:24:46.061325+00:00',
+  updated_at: '2025-12-06T10:24:46.061325+00:00'
+}
+
+4. Verifying visibility...
+   Ô£ô Artist can see the label.
+   Ô£ô Other users cannot see the label.
+
+SUCCESS: Custom Label Flow Verified!
+
+Cleaning up test user...

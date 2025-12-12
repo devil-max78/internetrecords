@@ -5,6 +5,9 @@ import { toast } from 'react-hot-toast';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { rootRoute } from './root';
 import { api } from '../api';
+import { CustomLabelModal } from '../components/CustomLabelModal';
+import { useAuth } from '../context/AuthContext';
+
 
 type UploadFormData = {
   subLabelId: string;
@@ -48,7 +51,8 @@ function UploadEnhancedComponent() {
   const [selectedArtist, setSelectedArtist] = useState<any>(null);
   const [tracks, setTracks] = useState<TrackData[]>([]);
   const [showArtistDropdown, setShowArtistDropdown] = useState(false);
-  
+  const [isCustomLabelModalOpen, setIsCustomLabelModalOpen] = useState(false);
+
   const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<UploadFormData>({
     defaultValues: {
       subLabelId: '',
@@ -60,9 +64,11 @@ function UploadEnhancedComponent() {
 
   const primaryArtistName = watch('primaryArtistName');
 
+  const { user } = useAuth(); // Ensure we have user
+
   // Fetch sub-labels
   const { data: subLabels } = useQuery({
-    queryKey: ['subLabels'],
+    queryKey: ['subLabels', user?.id],
     queryFn: () => api.metadata.getSubLabels(),
   });
 
@@ -113,26 +119,26 @@ function UploadEnhancedComponent() {
       // Check image dimensions
       const img = new Image();
       const objectUrl = URL.createObjectURL(file);
-      
+
       img.onload = () => {
         URL.revokeObjectURL(objectUrl);
-        
+
         const width = img.width;
         const height = img.height;
-        
+
         // Validate dimensions: must be square and between 1600x1600 and 3000x3000
         if (width !== height) {
           toast.error('Album artwork must be square (equal width and height)');
           e.target.value = '';
           return;
         }
-        
+
         if (width < 1600 || width > 3000) {
           toast.error('Album artwork must be between 1600x1600px and 3000x3000px');
           e.target.value = '';
           return;
         }
-        
+
         // Dimensions are valid, proceed with file
         setArtworkFile(file);
         const reader = new FileReader();
@@ -140,16 +146,16 @@ function UploadEnhancedComponent() {
           setArtworkPreview(reader.result as string);
         };
         reader.readAsDataURL(file);
-        
+
         toast.success(`✓ Valid artwork: ${width}x${height}px`);
       };
-      
+
       img.onerror = () => {
         URL.revokeObjectURL(objectUrl);
         toast.error('Failed to load image');
         e.target.value = '';
       };
-      
+
       img.src = objectUrl;
     }
   };
@@ -293,12 +299,12 @@ function UploadEnhancedComponent() {
   return (
     <div className="max-w-4xl mx-auto">
       <h1 className="text-3xl font-bold text-gray-800 mb-6">Create New Release</h1>
-      
+
       <form onSubmit={handleSubmit(onSubmit)} className="bg-white rounded-lg shadow-md p-6 space-y-6">
         {/* Sub-Label Section */}
         <div className="border-b pb-4">
           <h2 className="text-xl font-semibold mb-4">Sub-Label</h2>
-          
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Select Sub-Label *
@@ -315,16 +321,30 @@ function UploadEnhancedComponent() {
             {errors.subLabelId && (
               <p className="text-red-500 text-sm mt-1">{errors.subLabelId.message}</p>
             )}
-            <p className="text-sm text-gray-500 mt-1">
-              Contact admin to add new sub-labels
-            </p>
+            <div className="flex justify-between items-center mt-2">
+              <p className="text-sm text-gray-500">
+                Can't find your label?
+              </p>
+              <button
+                type="button"
+                onClick={() => setIsCustomLabelModalOpen(true)}
+                className="text-sm text-indigo-600 hover:text-indigo-800 font-medium"
+              >
+                Request Custom Label
+              </button>
+            </div>
           </div>
         </div>
+
+        <CustomLabelModal
+          isOpen={isCustomLabelModalOpen}
+          onClose={() => setIsCustomLabelModalOpen(false)}
+        />
 
         {/* Basic Information */}
         <div className="border-b pb-4">
           <h2 className="text-xl font-semibold mb-4">Basic Information</h2>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -422,7 +442,7 @@ function UploadEnhancedComponent() {
         {/* Copyright & Publisher */}
         <div className="border-b pb-4">
           <h2 className="text-xl font-semibold mb-4">Copyright & Publisher</h2>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -457,13 +477,13 @@ function UploadEnhancedComponent() {
         {/* Artwork */}
         <div className="border-b pb-4">
           <h2 className="text-xl font-semibold mb-4">Inlay / Album Art *</h2>
-          
+
           <div className="bg-blue-50 border border-blue-200 rounded-md p-3 mb-4">
             <p className="text-sm text-blue-800">
               <strong>Requirements:</strong> Square image (equal width and height), minimum 1600x1600px, maximum 3000x3000px
             </p>
           </div>
-          
+
           <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
             {artworkPreview ? (
               <div>
@@ -500,7 +520,7 @@ function UploadEnhancedComponent() {
         {/* Primary Artist */}
         <div className="border-b pb-4">
           <h2 className="text-xl font-semibold mb-4">Primary Artist</h2>
-          
+
           <div className="relative">
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Artist Name *
@@ -519,7 +539,7 @@ function UploadEnhancedComponent() {
             {errors.primaryArtistName && (
               <p className="text-red-500 text-sm mt-1">{errors.primaryArtistName.message}</p>
             )}
-            
+
             {showArtistDropdown && artists && artists.length > 0 && (
               <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-40 overflow-y-auto">
                 {artists.map((artist: any) => (
@@ -534,11 +554,11 @@ function UploadEnhancedComponent() {
                 ))}
               </div>
             )}
-            
+
             {selectedArtist && (
               <p className="text-sm text-green-600 mt-1">✓ Selected: {selectedArtist.name}</p>
             )}
-            
+
             {primaryArtistName && primaryArtistName.length > 2 && !selectedArtist && (!artists || artists.length === 0) && (
               <p className="text-sm text-blue-600 mt-1">New artist "{primaryArtistName}" will be created</p>
             )}
@@ -557,7 +577,7 @@ function UploadEnhancedComponent() {
               Add Track
             </button>
           </div>
-          
+
           {tracks.map((track, index) => (
             <div key={index} className="border border-gray-200 rounded-md p-4 mb-4">
               <div className="flex justify-between items-center mb-3">
@@ -570,7 +590,7 @@ function UploadEnhancedComponent() {
                   Remove
                 </button>
               </div>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -585,7 +605,7 @@ function UploadEnhancedComponent() {
                     required
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Genre
@@ -598,7 +618,7 @@ function UploadEnhancedComponent() {
                     placeholder="Pop, Rock, etc."
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Language
@@ -611,7 +631,7 @@ function UploadEnhancedComponent() {
                     placeholder="English, Hindi, etc."
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     ISRC
@@ -624,7 +644,7 @@ function UploadEnhancedComponent() {
                     placeholder="International Standard Recording Code"
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Singer
@@ -637,7 +657,7 @@ function UploadEnhancedComponent() {
                     placeholder="Singer name"
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Lyricist
@@ -650,7 +670,7 @@ function UploadEnhancedComponent() {
                     placeholder="Lyricist name"
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Composer
@@ -663,7 +683,7 @@ function UploadEnhancedComponent() {
                     placeholder="Composer name"
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Producer
@@ -676,7 +696,7 @@ function UploadEnhancedComponent() {
                     placeholder="Producer name"
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Featuring
@@ -689,7 +709,7 @@ function UploadEnhancedComponent() {
                     placeholder="Featured artists"
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Audio File (MP3 only) <span className="text-red-600">*</span>
@@ -720,7 +740,7 @@ function UploadEnhancedComponent() {
                   )}
                 </div>
               </div>
-              
+
               {/* CRBT Time Selection */}
               <div className="mt-4">
                 <h4 className="font-medium mb-2">CRBT (Caller Ring Back Tone) Time</h4>
@@ -753,7 +773,7 @@ function UploadEnhancedComponent() {
               </div>
             </div>
           ))}
-          
+
           {tracks.length === 0 && (
             <p className="text-gray-500 text-center py-8">No tracks added yet. Click "Add Track" to get started.</p>
           )}

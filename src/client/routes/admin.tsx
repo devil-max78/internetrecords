@@ -310,6 +310,12 @@ function AdminComponent() {
         <h1 className="text-3xl font-bold text-indigo-800">Admin Dashboard</h1>
         <div className="flex gap-3">
           <a
+            href="/admin/agreements"
+            className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition"
+          >
+            Agreement Requests
+          </a>
+          <a
             href="/admin/youtube-claims"
             className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition"
           >

@@ -24,6 +24,9 @@ const Navbar: React.FC = () => {
               <Link to="/upload" className="hover:text-indigo-200 transition">
                 Upload
               </Link>
+              <Link to="/agreement-request" className="hover:text-indigo-200 transition">
+                Request New Label
+              </Link>
               <Link to="/youtube-claim" className="hover:text-indigo-200 transition">
                 YouTube Claim
               </Link>
@@ -47,6 +50,12 @@ const Navbar: React.FC = () => {
             <span className="hidden md:inline text-sm">
               {user?.name} ({user?.role})
             </span>
+            <Link
+              to="/profile"
+              className="bg-indigo-500 text-white px-4 py-1 rounded-md hover:bg-indigo-400 transition"
+            >
+              Profile
+            </Link>
             <button
               onClick={logout}
               className="bg-white text-indigo-600 px-4 py-1 rounded-md hover:bg-indigo-100 transition"

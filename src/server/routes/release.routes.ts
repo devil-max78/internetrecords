@@ -244,7 +244,7 @@ router.post('/:id/submit', async (req, res) => {
 router.post('/:id/tracks', async (req, res) => {
   try {
     const { id: releaseId } = req.params;
-    const { title, duration, genre, language, isrc, audioUrl, crbtStartTime, crbtEndTime } = req.body;
+    const { title, duration, genre, language, isrc, audioUrl, crbtStartTime, crbtEndTime, singer, lyricist, composer, producer, featuring } = req.body;
     const userId = req.user!.id;
 
     const release = await db.release.findUnique({ where: { id: releaseId } });
@@ -268,6 +268,11 @@ router.post('/:id/tracks', async (req, res) => {
         genre,
         language,
         isrc,
+        singer,
+        lyricist,
+        composer,
+        producer,
+        featuring,
         audioUrl,
         crbtStartTime,
         crbtEndTime,
@@ -286,7 +291,7 @@ router.post('/:id/tracks', async (req, res) => {
 router.put('/tracks/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, duration, genre, language, isrc, audioUrl, crbtStartTime, crbtEndTime } = req.body;
+    const { title, duration, genre, language, isrc, audioUrl, crbtStartTime, crbtEndTime, singer, lyricist, composer, producer, featuring } = req.body;
     const userId = req.user!.id;
 
     const track = await db.track.findUnique({
@@ -308,7 +313,7 @@ router.put('/tracks/:id', async (req, res) => {
 
     const updatedTrack = await db.track.update({
       where: { id },
-      data: { title, duration, genre, language, isrc, audioUrl, crbtStartTime, crbtEndTime },
+      data: { title, duration, genre, language, isrc, audioUrl, crbtStartTime, crbtEndTime, singer, lyricist, composer, producer, featuring },
     });
 
     res.json(updatedTrack);

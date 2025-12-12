@@ -7,6 +7,133 @@ const router = Router();
 // All routes require authentication
 router.use(authMiddleware);
 
+// GET /profile - Get current user's profile
+router.get('/', async (req, res) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+    
+    const user = await db.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        role: true,
+        legalName: true,
+        mobile: true,
+        address: true,
+        entityName: true,
+        createdAt: true,
+        updatedAt: true
+      }
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    res.json(user);
+  } catch (error) {
+    console.error('Error fetching user profile:', error);
+    res.status(500).json({ error: 'Failed to fetch user profile' });
+  }
+});
+
+// PUT /profile - Update current user's profile
+router.put('/', async (req, res) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const { name, legalName, mobile, address, entityName } = req.body;
+
+    // Validate input
+    if (!name || name.trim() === '') {
+      return res.status(400).json({ error: 'Name is required' });
+    }
+
+    // Update user profile
+    const updatedUser = await db.user.update({
+      where: { id: userId },
+      data: {
+        name: name.trim(),
+        legalName: legalName?.trim() || null,
+        mobile: mobile?.trim() || null,
+        address: address?.trim() || null,
+        entityName: entityName?.trim() || null
+      },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        role: true,
+        legalName: true,
+        mobile: true,
+        address: true,
+        entityName: true,
+        createdAt: true,
+        updatedAt: true
+      }
+    });
+
+    res.json(updatedUser);
+  } catch (error) {
+    console.error('Error updating user profile:', error);
+    res.status(500).json({ error: 'Failed to update user profile' });
+  }
+});
+
+// GET /profile/completeness - Check if profile is complete for agreement generation
+router.get('/completeness', async (req, res) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+    
+    const user = await db.user.findUnique({
+      where: { id: userId },
+      select: {
+        name: true,
+        legalName: true,
+        mobile: true,
+        address: true,
+        entityName: true
+      }
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Check which fields are missing
+    const missingFields: string[] = [];
+    if (!user.name || user.name.trim() === '') missingFields.push('name');
+    if (!user.legalName || user.legalName.trim() === '') missingFields.push('legalName');
+    if (!user.mobile || user.mobile.trim() === '') missingFields.push('mobile');
+    if (!user.address || user.address.trim() === '') missingFields.push('address');
+    if (!user.entityName || user.entityName.trim() === '') missingFields.push('entityName');
+
+    const isComplete = missingFields.length === 0;
+
+    res.json({
+      isComplete,
+      missingFields,
+      message: isComplete 
+        ? 'Profile is complete' 
+        : `Please complete your profile: ${missingFields.join(', ')}`
+    });
+  } catch (error) {
+    console.error('Error checking profile completeness:', error);
+    res.status(500).json({ error: 'Failed to check profile completeness' });
+  }
+});
+
 // Get user's effective label (custom or global default)
 router.get('/label', async (req, res) => {
   try {

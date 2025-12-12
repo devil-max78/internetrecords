@@ -2,6 +2,31 @@ import { supabase } from './supabase';
 
 // Database utility functions to replace Prisma operations
 
+// Helper function to convert camelCase to snake_case
+const toSnakeCaseUser = (obj: any): any => {
+  if (!obj || typeof obj !== 'object') return obj;
+
+  const converted: any = {};
+  for (const key in obj) {
+    const snakeKey = key.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`);
+    converted[snakeKey] = obj[key];
+  }
+  return converted;
+};
+
+// Helper function to convert snake_case to camelCase
+const toCamelCaseUser = (obj: any): any => {
+  if (!obj || typeof obj !== 'object') return obj;
+  if (Array.isArray(obj)) return obj.map(toCamelCaseUser);
+
+  const converted: any = {};
+  for (const key in obj) {
+    const camelKey = key.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase());
+    converted[camelKey] = obj[key];
+  }
+  return converted;
+};
+
 // User operations
 export const userOperations = {
   findUnique: async (options: any) => {
@@ -17,7 +42,7 @@ export const userOperations = {
       if (error.code === 'PGRST116') return null;
       throw error;
     }
-    return data;
+    return toCamelCaseUser(data);
   },
 
   findFirst: async (options: any) => {
@@ -31,7 +56,7 @@ export const userOperations = {
       .single();
 
     if (error && error.code !== 'PGRST116') return null; // No rows returned
-    return data;
+    return toCamelCaseUser(data);
   },
 
   findMany: async (options: any = {}) => {
@@ -43,44 +68,85 @@ export const userOperations = {
 
     const { data, error } = await query;
     if (error) throw error;
-    return data || [];
+    return data ? data.map(toCamelCaseUser) : [];
   },
 
   create: async (options: any) => {
     const data = options.data || options;
-    
+
     // If id is provided (from Supabase Auth), use it
     const insertData = data.id ? data : { ...data };
+    const snakeData = toSnakeCaseUser(insertData);
 
     const { data: newUser, error } = await supabase
       .from('users')
-      .insert(insertData)
+      .insert(snakeData)
       .select()
       .single();
 
     if (error) throw error;
-    return newUser;
+    return toCamelCaseUser(newUser);
   },
 
   update: async (options: any) => {
     const { where, data } = options;
+    const snakeData = toSnakeCaseUser(data);
 
     const { data: updated, error } = await supabase
       .from('users')
-      .update(data)
+      .update(snakeData)
       .match(where)
       .select()
       .single();
 
     if (error) throw error;
-    return updated;
+    return toCamelCaseUser(updated);
+  },
+
+  upsert: async (options: any) => {
+    const { where, update, create } = options;
+
+    // Try to find existing user
+    const existing = await userOperations.findUnique({ where });
+
+    if (existing) {
+      // Update existing user
+      return await userOperations.update({ where, data: update });
+    } else {
+      // Create new user
+      return await userOperations.create({ data: create });
+    }
+  },
+
+  deleteMany: async (options: any) => {
+    const where = options.where || options;
+
+    const { error } = await supabase
+      .from('users')
+      .delete()
+      .match(where);
+
+    if (error) throw error;
+    return { count: 1 }; // Supabase doesn't return count
+  },
+
+  delete: async (options: any) => {
+    const where = options.where || options;
+
+    const { error } = await supabase
+      .from('users')
+      .delete()
+      .match(where);
+
+    if (error) throw error;
+    return { success: true };
   },
 };
 
 // Helper function to convert camelCase to snake_case
 const toSnakeCase = (obj: any): any => {
   if (!obj || typeof obj !== 'object') return obj;
-  
+
   const converted: any = {};
   for (const key in obj) {
     const snakeKey = key.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`);
@@ -93,7 +159,7 @@ const toSnakeCase = (obj: any): any => {
 const toCamelCase = (obj: any): any => {
   if (!obj || typeof obj !== 'object') return obj;
   if (Array.isArray(obj)) return obj.map(toCamelCase);
-  
+
   const converted: any = {};
   for (const key in obj) {
     const camelKey = key.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase());
@@ -378,9 +444,8 @@ export const disconnect = async () => {
 export const subLabelOperations = {
   create: async (options: any) => {
     const data = options.data || options;
-    // Don't include userId for sub-labels (they're global)
-    const { userId, ...cleanData } = data;
-    const snakeData = toSnakeCase(cleanData);
+    console.log('[DEBUG] db.subLabel.create data:', data);
+    const snakeData = toSnakeCase(data);
 
     const { data: newSubLabel, error } = await supabase
       .from('sub_labels')
@@ -396,8 +461,21 @@ export const subLabelOperations = {
     let query = supabase.from('sub_labels').select('*').order('name');
 
     if (options.where) {
-      const snakeWhere = toSnakeCase(options.where);
-      query = query.match(snakeWhere);
+      if (options.where.OR) {
+        // Handle OR query for getting both global and user specific labels
+        // Expected format: OR: [{ user_id: null }, { user_id: userId }]
+        // Expected format: OR: [{ user_id: null }, { user_id: userId }]
+        const userCondition = options.where.OR.find((c: any) => c.user_id && c.user_id !== 'is.null')?.user_id;
+
+        if (userCondition) {
+          query = query.or(`user_id.is.null,user_id.eq.${userCondition}`);
+        } else {
+          query = query.is('user_id', null);
+        }
+      } else {
+        const snakeWhere = toSnakeCase(options.where);
+        query = query.match(snakeWhere);
+      }
     }
 
     const { data, error } = await query;
@@ -417,6 +495,22 @@ export const subLabelOperations = {
     if (error) throw error;
     return { success: true };
   },
+
+  update: async (options: any) => {
+    const { where, data } = options;
+    const snakeWhere = toSnakeCase(where);
+    const snakeData = toSnakeCase(data);
+
+    const { data: updated, error } = await supabase
+      .from('sub_labels')
+      .update(snakeData)
+      .match(snakeWhere)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return toCamelCase(updated);
+  },
 };
 
 // Artist operations
@@ -424,7 +518,7 @@ export const artistOperations = {
   create: async (options: any) => {
     const data = options.data || options;
     const snakeData = toSnakeCase(data);
-    
+
     const { data: newArtist, error } = await supabase
       .from('artists')
       .insert(snakeData)
@@ -474,7 +568,7 @@ export const publisherOperations = {
   create: async (options: any) => {
     const data = options.data || options;
     const snakeData = toSnakeCase(data);
-    
+
     const { data: newPublisher, error } = await supabase
       .from('publishers')
       .insert(snakeData)
@@ -514,7 +608,7 @@ export const albumCategoryOperations = {
   create: async (options: any) => {
     const data = options.data || options;
     const snakeData = toSnakeCase(data);
-    
+
     const { data: newCategory, error } = await supabase
       .from('album_categories')
       .insert(snakeData)
@@ -554,7 +648,7 @@ export const contentTypeOperations = {
   create: async (options: any) => {
     const data = options.data || options;
     const snakeData = toSnakeCase(data);
-    
+
     const { data: newType, error } = await supabase
       .from('content_types')
       .insert(snakeData)
@@ -751,6 +845,60 @@ export const socialMediaLinkingOperations = {
   },
 };
 
+// Custom Label Request operations
+export const customLabelRequestOperations = {
+  create: async (options: any) => {
+    const data = options.data || options;
+    const snakeData = toSnakeCase(data);
+
+    const { data: newRequest, error } = await supabase
+      .from('custom_label_requests')
+      .insert(snakeData)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return toCamelCase(newRequest);
+  },
+
+  findMany: async (options: any = {}) => {
+    let query = supabase.from('custom_label_requests').select('*, user:users(*)').order('created_at', { ascending: false });
+
+    if (options.where) {
+      const snakeWhere = toSnakeCase(options.where);
+      query = query.match(snakeWhere);
+    }
+
+    const { data, error } = await query;
+    if (error) throw error;
+
+    return data ? data.map((item: any) => {
+      const camelItem = toCamelCase(item);
+      // Ensure user is properly nested if returned
+      if (item.user) {
+        camelItem.user = toCamelCase(item.user);
+      }
+      return camelItem;
+    }) : [];
+  },
+
+  update: async (options: any) => {
+    const { where, data } = options;
+    const snakeWhere = toSnakeCase(where);
+    const snakeData = toSnakeCase(data);
+
+    const { data: updated, error } = await supabase
+      .from('custom_label_requests')
+      .update(snakeData)
+      .match(snakeWhere)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return toCamelCase(updated);
+  },
+};
+
 // Global Settings operations
 export const globalSettingsOperations = {
   get: async (key: string) => {
@@ -894,6 +1042,179 @@ export const artistProfileLinkingOperations = {
   },
 };
 
+// Agreement Request operations
+export const agreementRequestOperations = {
+  create: async (options: any) => {
+    const data = options.data || options;
+    const snakeData = toSnakeCase(data);
+
+    const { data: newRequest, error } = await supabase
+      .from('agreement_requests')
+      .insert(snakeData)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return toCamelCase(newRequest);
+  },
+
+  findMany: async (options: any = {}) => {
+    let query = supabase.from('agreement_requests').select('*').order('created_at', { ascending: false });
+
+    if (options.where) {
+      const snakeWhere = toSnakeCase(options.where);
+      query = query.match(snakeWhere);
+    }
+
+    if (options.orderBy) {
+      const [field, direction] = Object.entries(options.orderBy)[0];
+      const snakeField = field.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`);
+      query = query.order(snakeField, { ascending: direction === 'asc' });
+    }
+
+    const { data, error } = await query;
+    if (error) throw error;
+    return data ? data.map(toCamelCase) : [];
+  },
+
+  findUnique: async (options: any) => {
+    const where = options.where || options;
+    const snakeWhere = toSnakeCase(where);
+
+    const { data, error } = await supabase
+      .from('agreement_requests')
+      .select('*')
+      .match(snakeWhere)
+      .single();
+
+    if (error) {
+      if (error.code === 'PGRST116') return null;
+      throw error;
+    }
+    return toCamelCase(data);
+  },
+
+  findFirst: async (options: any) => {
+    const where = options.where || options;
+    const snakeWhere = toSnakeCase(where);
+
+    let query = supabase
+      .from('agreement_requests')
+      .select('*')
+      .match(snakeWhere);
+
+    if (options.orderBy) {
+      const [field, direction] = Object.entries(options.orderBy)[0];
+      const snakeField = field.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`);
+      query = query.order(snakeField, { ascending: direction === 'asc' });
+    }
+
+    query = query.limit(1).single();
+
+    const { data, error } = await query;
+    if (error && error.code !== 'PGRST116') throw error;
+    if (!data) return null;
+    return toCamelCase(data);
+  },
+
+  update: async (options: any) => {
+    const { where, data } = options;
+    const snakeWhere = toSnakeCase(where);
+    const snakeData = toSnakeCase(data);
+
+    const { data: updated, error } = await supabase
+      .from('agreement_requests')
+      .update(snakeData)
+      .match(snakeWhere)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return toCamelCase(updated);
+  },
+
+  deleteMany: async (options: any) => {
+    const where = options.where || options;
+
+    // Handle OR clause
+    if (where.OR && Array.isArray(where.OR)) {
+      // Delete each condition separately
+      for (const condition of where.OR) {
+        const snakeCondition = toSnakeCase(condition);
+        await supabase
+          .from('agreement_requests')
+          .delete()
+          .match(snakeCondition);
+      }
+      return { count: where.OR.length };
+    }
+
+    const snakeWhere = toSnakeCase(where);
+    const { error } = await supabase
+      .from('agreement_requests')
+      .delete()
+      .match(snakeWhere);
+
+    if (error) throw error;
+    return { count: 1 };
+  },
+};
+
+// Agreement Audit Log operations
+export const agreementAuditLogOperations = {
+  create: async (options: any) => {
+    const data = options.data || options;
+    const snakeData = toSnakeCase(data);
+
+    const { data: newLog, error } = await supabase
+      .from('agreement_audit_log')
+      .insert(snakeData)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return toCamelCase(newLog);
+  },
+
+  findMany: async (options: any = {}) => {
+    let query = supabase.from('agreement_audit_log').select('*').order('created_at', { ascending: false });
+
+    if (options.where) {
+      const snakeWhere = toSnakeCase(options.where);
+      query = query.match(snakeWhere);
+    }
+
+    const { data, error } = await query;
+    if (error) throw error;
+    return data ? data.map(toCamelCase) : [];
+  },
+
+  deleteMany: async (options: any) => {
+    const where = options.where || options;
+
+    // Handle special cases like 'in' operator
+    if (where.agreementRequestId && where.agreementRequestId.in) {
+      const ids = where.agreementRequestId.in;
+      const { error } = await supabase
+        .from('agreement_audit_log')
+        .delete()
+        .in('agreement_request_id', ids);
+
+      if (error) throw error;
+      return { count: ids.length };
+    }
+
+    const snakeWhere = toSnakeCase(where);
+    const { error } = await supabase
+      .from('agreement_audit_log')
+      .delete()
+      .match(snakeWhere);
+
+    if (error) throw error;
+    return { count: 1 };
+  },
+};
+
 // Export a db object that mimics Prisma's structure
 export const db = {
   user: userOperations,
@@ -912,6 +1233,9 @@ export const db = {
   userLabel: userLabelOperations,
   userPublisher: userPublisherOperations,
   artistProfileLinking: artistProfileLinkingOperations,
+  customLabelRequest: customLabelRequestOperations,
+  agreementRequest: agreementRequestOperations,
+  agreementAuditLog: agreementAuditLogOperations,
   $disconnect: disconnect
 };
 

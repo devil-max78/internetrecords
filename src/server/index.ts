@@ -16,6 +16,9 @@ import youtubeOacRoutes from './routes/youtube-oac.routes';
 import socialMediaLinkingRoutes from './routes/social-media-linking.routes';
 import labelPublisherRoutes from './routes/label-publisher.routes';
 import artistProfileLinkingRoutes from './routes/artist-profile-linking.routes';
+import customLabelRoutes from './routes/custom-labels.routes';
+import agreementRoutes from './routes/agreement.routes';
+import userProfileRoutes from './routes/user-profile.routes';
 
 // Initialize Express app
 const app = express();
@@ -24,6 +27,28 @@ const PORT = process.env.PORT || 3000;
 // Middleware
 app.use(cors());
 app.use(express.json());
+
+// Request logging middleware
+app.use('/api', (req, res, next) => {
+  console.log(`[API] ${req.method} ${req.url}`);
+  if (Object.keys(req.body).length > 0) {
+    console.log('      Body:', JSON.stringify(req.body, null, 2));
+  }
+  if (req.headers.authorization) {
+    console.log('      Auth: Bearer token present');
+  } else {
+    console.log('      Auth: No token provided');
+  }
+
+  // Capture response status
+  const originalSend = res.send;
+  res.send = function (body) {
+    console.log(`[API] Response ${res.statusCode} for ${req.method} ${req.url}`);
+    return originalSend.call(this, body);
+  };
+
+  next();
+});
 
 // Serve static files from the client build
 const clientPath = path.join(__dirname, '..', 'client');
@@ -40,6 +65,9 @@ app.use('/api/youtube-oac', youtubeOacRoutes);
 app.use('/api/social-media-linking', socialMediaLinkingRoutes);
 app.use('/api/label-publisher', labelPublisherRoutes);
 app.use('/api/artist-profile-linking', artistProfileLinkingRoutes);
+app.use('/api/custom-labels', customLabelRoutes);
+app.use('/api/agreement', agreementRoutes);
+app.use('/api/user-profile', userProfileRoutes);
 
 // Health check endpoint
 app.get('/api/health', (_req, res) => {

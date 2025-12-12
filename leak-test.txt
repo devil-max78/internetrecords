@@ -1,0 +1,1 @@
+PASS: User B cannot see User A's private label.

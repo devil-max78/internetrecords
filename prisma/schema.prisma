@@ -11,14 +11,18 @@ datasource db {
 }
 
 model User {
-  id        String    @id @default(uuid())
-  email     String    @unique
-  password  String
-  name      String
-  role      UserRole
-  releases  Release[]
-  createdAt DateTime  @default(now()) @map("created_at")
-  updatedAt DateTime  @updatedAt @map("updated_at")
+  id         String    @id @default(uuid())
+  email      String    @unique
+  password   String
+  name       String
+  role       UserRole
+  legalName  String?   @map("legal_name")
+  mobile     String?
+  address    String?
+  entityName String?   @map("entity_name")
+  releases   Release[]
+  createdAt  DateTime  @default(now()) @map("created_at")
+  updatedAt  DateTime  @updatedAt @map("updated_at")
 
   @@map("users")
 }
@@ -45,6 +49,11 @@ model Track {
   genre     String?
   language  String?
   isrc      String?  // International Standard Recording Code
+  singer    String?
+  lyricist  String?
+  composer  String?
+  producer  String?
+  featuring String?
   audioUrl  String?  @map("audio_url")
   release   Release  @relation(fields: [releaseId], references: [id], onDelete: Cascade)
   releaseId String   @map("release_id")

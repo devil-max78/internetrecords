@@ -22,6 +22,10 @@ import { labelPublisherSettingsRoute } from './routes/label-publisher-settings';
 import { editReleaseRoute } from './routes/edit-release';
 import { artistProfileLinkingRoute } from './routes/artist-profile-linking';
 import { adminArtistProfileLinkingRoute } from './routes/admin-artist-profile-linking';
+import { agreementRequestRoute } from './routes/agreement-request';
+import { agreementStatusRoute } from './routes/agreement-status';
+import { adminAgreementsRoute } from './routes/admin-agreements';
+import { profileRoute } from './routes/profile-route';
 
 // Create query client outside component
 const queryClient = new QueryClient({
@@ -52,6 +56,10 @@ const routeTree = rootRoute.addChildren([
   editReleaseRoute,
   artistProfileLinkingRoute,
   adminArtistProfileLinkingRoute,
+  agreementRequestRoute,
+  agreementStatusRoute,
+  adminAgreementsRoute,
+  profileRoute,
 ]);
 
 const router = createRouter({ 

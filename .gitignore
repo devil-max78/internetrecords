@@ -45,3 +45,6 @@ Thumbs.db
 .cache/
 temp/
 tmp/
+#unwanted
+*.md
+*.sql

@@ -1,9 +1,7 @@
-import React from 'react';
 import { createRoute, Link } from '@tanstack/react-router';
 import { toast } from 'react-hot-toast';
 import { useQuery } from '@tanstack/react-query';
 import { rootRoute } from './root';
-import { useAuth } from '../context/AuthContext';
 import { api } from '../api';
 import StatusBadge from '../components/StatusBadge';
 
@@ -14,10 +12,15 @@ export const dashboardRoute = createRoute({
 });
 
 function DashboardComponent() {
-  const { user } = useAuth();
   const { data: releases, isLoading, error } = useQuery({
     queryKey: ['releases'],
     queryFn: () => api.releases.getAll(),
+  });
+
+  // Fetch user's custom labels
+  const { data: userLabels = [] } = useQuery({
+    queryKey: ['userLabels'],
+    queryFn: () => api.labelPublisher.getUserLabels(),
   });
 
   if (isLoading) {
@@ -41,13 +44,49 @@ function DashboardComponent() {
     <div>
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold text-gray-800">Your Releases</h1>
-        <Link
-          to="/upload"
-          className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-2 px-4 rounded-md hover:from-indigo-700 hover:to-purple-700 transition"
-        >
-          Create New Release
-        </Link>
+        <div className="flex gap-3">
+          <Link
+            to="/agreement-status"
+            className="bg-gradient-to-r from-purple-600 to-pink-600 text-white py-2 px-4 rounded-md hover:from-purple-700 hover:to-pink-700 transition"
+          >
+            Agreement Status
+          </Link>
+          <Link
+            to="/upload"
+            className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-2 px-4 rounded-md hover:from-indigo-700 hover:to-purple-700 transition"
+          >
+            Create New Release
+          </Link>
+        </div>
       </div>
+
+      {/* User's Custom Labels Section */}
+      {userLabels.length > 0 && (
+        <div className="bg-white rounded-lg shadow-md p-4 mb-6">
+          <div className="flex justify-between items-center mb-3">
+            <h2 className="text-lg font-semibold text-gray-700">Your Labels</h2>
+            <Link
+              to="/label-publisher-settings"
+              className="text-sm text-indigo-600 hover:text-indigo-800"
+            >
+              Manage Labels →
+            </Link>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {userLabels.map((label: any) => (
+              <span
+                key={label.id}
+                className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gradient-to-r from-indigo-100 to-purple-100 text-indigo-800 border border-indigo-200"
+              >
+                <svg className="w-4 h-4 mr-1.5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M17.707 9.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-7-7A.997.997 0 012 10V5a3 3 0 013-3h5c.256 0 .512.098.707.293l7 7zM5 6a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
+                </svg>
+                {label.labelName}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
 
       {releases?.length === 0 ? (
         <div className="bg-white rounded-lg shadow-md p-8 text-center">

@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { db } from '../db';
+import { supabase } from '../supabase';
 import { authMiddleware } from '../middleware/auth';
 
 const router = Router();
@@ -7,10 +8,30 @@ const router = Router();
 // All routes require authentication
 router.use(authMiddleware);
 
-// Get all sub-labels (global, available to all users)
-router.get('/sub-labels', async (_req, res) => {
+// Get all sub-labels (global + user-specific)
+router.get('/sub-labels', async (req, res) => {
   try {
-    const subLabels = await db.subLabel.findMany({});
+    const userId = req.user?.id;
+    
+    // Get global sub-labels (is_global = true) and user-specific sub-labels
+    const { data, error } = await supabase
+      .from('sub_labels')
+      .select('*')
+      .or(`is_global.eq.true,user_id.eq.${userId}`)
+      .order('name');
+    
+    if (error) throw error;
+    
+    // Convert to camelCase
+    const subLabels = data ? data.map((label: any) => ({
+      id: label.id,
+      name: label.name,
+      userId: label.user_id,
+      isGlobal: label.is_global,
+      createdAt: label.created_at,
+      updatedAt: label.updated_at,
+    })) : [];
+    
     res.json(subLabels);
   } catch (error) {
     console.error('Get sub-labels error:', error);
