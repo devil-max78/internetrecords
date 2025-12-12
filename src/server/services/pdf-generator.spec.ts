@@ -13,7 +13,6 @@ import {
   generatePDFHash, 
   verifyPDFHash 
 } from './pdf-generator';
-import { UserData } from './template-populator';
 import { supabase } from '../supabase';
 
 // Arbitrary for generating valid user data
@@ -107,7 +106,7 @@ describe('PDF Generator - Property 3: PDF generation produces valid output', () 
         
         expect(error).toBeNull();
         expect(data).toBeDefined();
-        expect(data.size).toBeGreaterThan(0);
+        expect(data!.size).toBeGreaterThan(0);
         
         // Cleanup: delete the test file
         await supabase.storage

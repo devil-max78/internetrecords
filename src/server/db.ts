@@ -1109,9 +1109,7 @@ export const agreementRequestOperations = {
       query = query.order(snakeField, { ascending: direction === 'asc' });
     }
 
-    query = query.limit(1).single();
-
-    const { data, error } = await query;
+    const { data, error } = await query.limit(1).single();
     if (error && error.code !== 'PGRST116') throw error;
     if (!data) return null;
     return toCamelCase(data);

@@ -49,7 +49,7 @@ async function createTestUser(email: string, password: string, role: 'ARTIST' | 
     let userId: string;
     let token: string;
 
-    const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+    const { data: signInData } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
@@ -538,21 +538,21 @@ describe('Integration Test 4: Edge Cases', () => {
 
   it('should return the latest agreement when multiple exist', async () => {
     // Create multiple agreements with delays
-    const response1 = await request(app)
+    await request(app)
       .post('/api/agreement/generate')
       .set('Authorization', `Bearer ${testUserToken}`)
       .expect(200);
 
     await new Promise(resolve => setTimeout(resolve, 100));
 
-    const response2 = await request(app)
+    await request(app)
       .post('/api/agreement/generate')
       .set('Authorization', `Bearer ${testUserToken}`)
       .expect(200);
 
     await new Promise(resolve => setTimeout(resolve, 100));
 
-    const response3 = await request(app)
+    await request(app)
       .post('/api/agreement/generate')
       .set('Authorization', `Bearer ${testUserToken}`)
       .expect(200);

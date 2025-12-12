@@ -10,8 +10,6 @@ import puppeteer from 'puppeteer';
 import crypto from 'crypto';
 import { supabase } from '../supabase';
 import { populateTemplate, UserData } from './template-populator';
-import fs from 'fs/promises';
-import path from 'path';
 
 const AGREEMENT_BUCKET = 'agreements';
 
