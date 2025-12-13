@@ -43,22 +43,24 @@ model Release {
 }
 
 model Track {
-  id        String   @id @default(uuid())
-  title     String
-  duration  Int?     // Duration in seconds
-  genre     String?
-  language  String?
-  isrc      String?  // International Standard Recording Code
-  singer    String?
-  lyricist  String?
-  composer  String?
-  producer  String?
-  featuring String?
-  audioUrl  String?  @map("audio_url")
-  release   Release  @relation(fields: [releaseId], references: [id], onDelete: Cascade)
-  releaseId String   @map("release_id")
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  id            String   @id @default(uuid())
+  title         String
+  duration      Int?     // Duration in seconds
+  genre         String?
+  language      String?
+  isrc          String?  // International Standard Recording Code
+  singer        String?
+  lyricist      String?
+  composer      String?
+  producer      String?
+  featuring     String?
+  audioUrl      String?  @map("audio_url")
+  crbtStartTime Int?     @map("crbt_start_time")
+  crbtEndTime   Int?     @map("crbt_end_time")
+  release       Release  @relation(fields: [releaseId], references: [id], onDelete: Cascade)
+  releaseId     String   @map("release_id")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
 
   @@map("tracks")
 }

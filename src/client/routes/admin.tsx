@@ -501,14 +501,17 @@ function AdminComponent() {
                       <div className="flex justify-between items-start mb-2">
                         <div className="flex-1">
                           <h5 className="font-medium text-gray-900">{index + 1}. {track.title}</h5>
-                          <div className="text-sm text-gray-600 mt-1 space-y-1">
+                          <div className="text-sm text-gray-600 mt-1 grid grid-cols-2 gap-x-4 gap-y-1">
                             <p><span className="font-medium">Duration:</span> {track.duration ? `${Math.floor(track.duration / 60)}:${(track.duration % 60).toString().padStart(2, '0')}` : 'N/A'}</p>
-                            {track.genre && <p><span className="font-medium">Genre:</span> {track.genre}</p>}
-                            {track.language && <p><span className="font-medium">Language:</span> {track.language}</p>}
-                            {track.isrc && <p><span className="font-medium">ISRC:</span> {track.isrc}</p>}
-                            {(track.crbtStartTime || track.crbtEndTime) && (
-                              <p><span className="font-medium">CRBT:</span> {track.crbtStartTime}s - {track.crbtEndTime}s</p>
-                            )}
+                            <p><span className="font-medium">Genre:</span> {track.genre || 'N/A'}</p>
+                            <p><span className="font-medium">Language:</span> {track.language || 'N/A'}</p>
+                            <p><span className="font-medium">ISRC:</span> {track.isrc || 'N/A'}</p>
+                            <p><span className="font-medium">Singer:</span> {track.singer || 'N/A'}</p>
+                            <p><span className="font-medium">Lyricist:</span> {track.lyricist || 'N/A'}</p>
+                            <p><span className="font-medium">Composer:</span> {track.composer || 'N/A'}</p>
+                            <p><span className="font-medium">Producer:</span> {track.producer || 'N/A'}</p>
+                            <p><span className="font-medium">Featuring:</span> {track.featuring || 'N/A'}</p>
+                            <p><span className="font-medium">CRBT:</span> {(track.crbtStartTime !== null && track.crbtStartTime !== undefined) || (track.crbtEndTime !== null && track.crbtEndTime !== undefined) ? `${track.crbtStartTime || 0}s - ${track.crbtEndTime || 0}s` : 'N/A'}</p>
                           </div>
                         </div>
                         <button
