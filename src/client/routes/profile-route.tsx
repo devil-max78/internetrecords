@@ -1,8 +1,8 @@
-import { Route } from '@tanstack/react-router';
+import { createRoute } from '@tanstack/react-router';
 import { rootRoute } from './root';
 import ProfilePage from './profile';
 
-export const profileRoute = new Route({
+export const profileRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/profile',
   component: ProfilePage,

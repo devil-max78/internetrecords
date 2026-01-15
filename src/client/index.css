@@ -2,24 +2,34 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Prevent horizontal overflow */
+html, body {
+  @apply overflow-x-hidden;
+  -webkit-overflow-scrolling: touch;
+}
+
 body {
-  @apply bg-gray-50 text-gray-900;
+  @apply bg-gray-50 text-gray-900 min-h-screen;
+}
+
+#root {
+  @apply min-h-screen overflow-x-hidden;
 }
 
 .container {
-  @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full;
 }
 
 .btn {
-  @apply inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500;
+  @apply inline-flex items-center justify-center px-3 py-2 sm:px-4 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 whitespace-nowrap;
 }
 
 .btn-secondary {
-  @apply inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500;
+  @apply inline-flex items-center justify-center px-3 py-2 sm:px-4 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 whitespace-nowrap;
 }
 
 .form-input {
-  @apply block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm;
+  @apply block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-base sm:text-sm;
 }
 
 .form-label {
@@ -31,17 +41,35 @@ body {
 }
 
 .card {
-  @apply bg-white shadow rounded-lg overflow-hidden;
+  @apply bg-white shadow rounded-lg overflow-hidden w-full;
 }
 
 .card-header {
-  @apply px-4 py-5 sm:px-6 border-b border-gray-200;
+  @apply px-4 py-4 sm:py-5 sm:px-6 border-b border-gray-200;
 }
 
 .card-body {
-  @apply px-4 py-5 sm:p-6;
+  @apply px-4 py-4 sm:p-6;
 }
 
 .card-footer {
-  @apply px-4 py-4 sm:px-6 border-t border-gray-200 bg-gray-50;
+  @apply px-4 py-3 sm:py-4 sm:px-6 border-t border-gray-200 bg-gray-50;
+}
+
+/* Responsive text utilities */
+@layer utilities {
+  .text-responsive {
+    @apply text-sm sm:text-base;
+  }
+  
+  .heading-responsive {
+    @apply text-xl sm:text-2xl lg:text-3xl;
+  }
+}
+
+/* Fix for iOS input zoom */
+@media screen and (max-width: 768px) {
+  input, select, textarea {
+    font-size: 16px !important;
+  }
 }

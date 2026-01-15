@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createRouter, RouterProvider } from '@tanstack/react-router';
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from './context/AuthContext';
+import ErrorBoundary from './components/ErrorBoundary';
 
 // Import routes
 import { rootRoute } from './routes/root';
@@ -80,14 +81,16 @@ declare module '@tanstack/react-router' {
 // App component
 const App: React.FC = () => {
   return (
-    <React.StrictMode>
-      <QueryClientProvider client={queryClient}>
-        <AuthProvider>
-          <RouterProvider router={router} />
-          <Toaster position="top-right" />
-        </AuthProvider>
-      </QueryClientProvider>
-    </React.StrictMode>
+    <ErrorBoundary>
+      <React.StrictMode>
+        <QueryClientProvider client={queryClient}>
+          <AuthProvider>
+            <RouterProvider router={router} />
+            <Toaster position="top-right" />
+          </AuthProvider>
+        </QueryClientProvider>
+      </React.StrictMode>
+    </ErrorBoundary>
   );
 };
 
