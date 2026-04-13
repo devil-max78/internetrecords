@@ -9,6 +9,7 @@ type SignupFormData = {
   email: string;
   password: string;
   name: string;
+  legalName: string;
   role: 'ARTIST' | 'LABEL';
 };
 
@@ -28,7 +29,7 @@ function SignupComponent() {
 
   const onSubmit = async (data: SignupFormData) => {
     try {
-      await signup(data.email, data.password, data.name, data.role);
+      await signup(data.email, data.password, data.name, data.legalName, data.role);
       toast.success('Account created successfully!');
     } catch (error) {
       toast.error('Signup failed. Please try again.');
@@ -60,6 +61,21 @@ function SignupComponent() {
             />
             {errors.name && (
               <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>
+            )}
+          </div>
+          <div>
+            <label htmlFor="legalName" className="block text-sm font-medium text-gray-700 mb-1">
+              Legal Name
+            </label>
+            <input
+              id="legalName"
+              type="text"
+              {...register('legalName', { required: 'Legal name is required' })}
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              placeholder="Your Legal Name"
+            />
+            {errors.legalName && (
+              <p className="text-red-500 text-sm mt-1">{errors.legalName.message}</p>
             )}
           </div>
           <div>

@@ -126,15 +126,9 @@ function UploadEnhancedComponent() {
         const width = img.width;
         const height = img.height;
 
-        // Validate dimensions: must be square and between 1600x1600 and 3000x3000
-        if (width !== height) {
-          toast.error('Album artwork must be square (equal width and height)');
-          e.target.value = '';
-          return;
-        }
-
-        if (width < 1600 || width > 3000) {
-          toast.error('Album artwork must be between 1600x1600px and 3000x3000px');
+        // Validate dimensions: must be exactly 3000x3000
+        if (width !== 3000 || height !== 3000) {
+          toast.error('Album artwork must be exactly 3000x3000px');
           e.target.value = '';
           return;
         }
@@ -480,7 +474,7 @@ function UploadEnhancedComponent() {
 
           <div className="bg-blue-50 border border-blue-200 rounded-md p-3 mb-4">
             <p className="text-sm text-blue-800">
-              <strong>Requirements:</strong> Square image (equal width and height), minimum 1600x1600px, maximum 3000x3000px
+              <strong>Requirements:</strong> Image must be exactly 3000x3000px
             </p>
           </div>
 
@@ -511,7 +505,7 @@ function UploadEnhancedComponent() {
                     className="hidden"
                   />
                 </label>
-                <p className="text-sm text-gray-500 mt-2">JPG, JPEG, or PNG (1600x1600px - 3000x3000px)</p>
+                <p className="text-sm text-gray-500 mt-2">JPG, JPEG, or PNG (3000x3000px)</p>
               </div>
             )}
           </div>
@@ -712,18 +706,18 @@ function UploadEnhancedComponent() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Audio File (MP3 only) <span className="text-red-600">*</span>
+                    Audio File (WAV only) <span className="text-red-600">*</span>
                   </label>
                   <input
                     type="file"
-                    accept=".mp3,audio/mpeg"
+                    accept=".wav,audio/wav,audio/x-wav"
                     required
                     onChange={(e) => {
                       const file = e.target.files?.[0];
                       if (file) {
-                        // Validate MP3 format
-                        if (!file.name.toLowerCase().endsWith('.mp3') && file.type !== 'audio/mpeg') {
-                          toast.error('Only MP3 files are allowed for audio uploads');
+                        // Validate WAV format
+                        if (!file.name.toLowerCase().endsWith('.wav') && file.type !== 'audio/wav' && file.type !== 'audio/x-wav') {
+                          toast.error('Only WAV files are allowed for audio uploads');
                           e.target.value = '';
                           return;
                         }

@@ -17,7 +17,7 @@ type AuthContextType = {
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  signup: (email: string, password: string, name: string, role: 'ARTIST' | 'LABEL') => Promise<void>;
+  signup: (email: string, password: string, name: string, legalName: string, role: 'ARTIST' | 'LABEL') => Promise<void>;
   logout: () => void;
 };
 
@@ -85,7 +85,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   // Signup function
-  const signup = async (email: string, password: string, name: string, role: 'ARTIST' | 'LABEL') => {
+  const signup = async (email: string, password: string, name: string, legalName: string, role: 'ARTIST' | 'LABEL') => {
     try {
       setIsLoading(true);
       
@@ -94,7 +94,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email, password, name, role }),
+        body: JSON.stringify({ email, password, name, legalName, role }),
       });
       
       if (!response.ok) {

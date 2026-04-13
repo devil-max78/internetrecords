@@ -42,6 +42,7 @@ router.post('/login', async (req, res) => {
         id: user.id,
         email: user.email,
         name: user.name,
+        legalName: user.legalName,
         role: user.role,
       },
     });
@@ -54,9 +55,9 @@ router.post('/login', async (req, res) => {
 // Signup endpoint using Supabase Auth
 router.post('/signup', async (req, res) => {
   try {
-    const { email, password, name, role } = req.body;
+    const { email, password, name, legalName, role } = req.body;
 
-    if (!email || !password || !name || !role) {
+    if (!email || !password || !name || !legalName || !role) {
       return res.status(400).json({ error: 'All fields are required' });
     }
 
@@ -72,7 +73,7 @@ router.post('/signup', async (req, res) => {
     }
 
     // Sign up with Supabase Auth
-    console.log('Attempting signup with:', { email, name, role });
+    console.log('Attempting signup with:', { email, name, legalName, role });
     
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email,
@@ -80,6 +81,7 @@ router.post('/signup', async (req, res) => {
       options: {
         data: {
           name,
+          legalName,
           role,
         },
         emailRedirectTo: undefined, // Disable email confirmation redirect
@@ -107,6 +109,7 @@ router.post('/signup', async (req, res) => {
         email,
         password: '', // Password is managed by Supabase Auth
         name,
+        legalName,
         role,
       },
     });
@@ -122,6 +125,7 @@ router.post('/signup', async (req, res) => {
         id: user.id,
         email: user.email,
         name: user.name,
+        legalName: user.legalName,
         role: user.role,
       },
       message: authData.session ? 'Account created successfully' : 'Please check your email to confirm your account',
@@ -207,6 +211,7 @@ router.get('/me', async (req, res) => {
         id: user.id,
         email: user.email,
         name: user.name,
+        legalName: user.legalName,
         role: user.role,
       },
     });

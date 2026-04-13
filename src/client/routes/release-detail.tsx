@@ -391,17 +391,17 @@ function ReleaseDetailComponent() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Audio File (MP3 only) <span className="text-red-600">*</span>
+                Audio File (WAV only) <span className="text-red-600">*</span>
               </label>
               <input
                 type="file"
-                accept=".mp3,audio/mpeg"
+                accept=".wav,audio/wav,audio/x-wav"
                 required
                 onChange={(e) => {
                   const file = e.target.files?.[0];
                   if (file) {
-                    if (!file.name.toLowerCase().endsWith('.mp3') && file.type !== 'audio/mpeg') {
-                      toast.error('Only MP3 files are allowed');
+                    if (!file.name.toLowerCase().endsWith('.wav') && file.type !== 'audio/wav' && file.type !== 'audio/x-wav') {
+                      toast.error('Only WAV files are allowed');
                       e.target.value = '';
                       return;
                     }

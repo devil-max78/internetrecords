@@ -370,7 +370,7 @@ function AdminComponent() {
                         <div className="text-sm font-medium text-gray-900">{release.title}</div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-500">{release.user?.name || 'Unknown'}</div>
+                        <div className="text-sm font-medium text-gray-900">{release.user?.name || 'Unknown'} {release.user?.legalName ? `(${release.user.legalName})` : ''}</div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <StatusBadge status={release.status} />
@@ -449,7 +449,7 @@ function AdminComponent() {
               <div>
                 <h3 className="text-lg font-medium text-gray-900 mb-3">{selectedRelease.title}</h3>
                 <div className="space-y-2 text-sm">
-                  <p className="text-gray-600"><span className="font-medium">Artist:</span> {selectedRelease.user?.name || 'Unknown'}</p>
+                  <p className="text-gray-600"><span className="font-medium">Artist:</span> {selectedRelease.user?.name || 'Unknown'} {selectedRelease.user?.legalName ? `(Legal Name: ${selectedRelease.user.legalName})` : ''}</p>
                   <p className="text-gray-600"><span className="font-medium">Email:</span> {selectedRelease.user?.email || 'N/A'}</p>
                   <p className="text-gray-600"><span className="font-medium">Status:</span> <StatusBadge status={selectedRelease.status} /></p>
                   <p className="text-gray-600"><span className="font-medium">UPC:</span> {selectedRelease.upc || 'N/A'}</p>
