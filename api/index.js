@@ -5,6 +5,7 @@ const cors = require('cors');
 // Import compiled routes
 let authRoutes, releaseRoutes, uploadRoutes, adminRoutes, metadataRoutes;
 let youtubeClaimRoutes, youtubeOacRoutes, socialMediaLinkingRoutes, labelPublisherRoutes;
+let artistProfileLinkingRoutes, customLabelRoutes, agreementRoutes, userProfileRoutes;
 
 try {
   authRoutes = require('../dist/server/routes/auth.routes').default;
@@ -16,6 +17,10 @@ try {
   youtubeOacRoutes = require('../dist/server/routes/youtube-oac.routes').default;
   socialMediaLinkingRoutes = require('../dist/server/routes/social-media-linking.routes').default;
   labelPublisherRoutes = require('../dist/server/routes/label-publisher.routes').default;
+  artistProfileLinkingRoutes = require('../dist/server/routes/artist-profile-linking.routes').default;
+  customLabelRoutes = require('../dist/server/routes/custom-labels.routes').default;
+  agreementRoutes = require('../dist/server/routes/agreement.routes').default;
+  userProfileRoutes = require('../dist/server/routes/user-profile.routes').default;
 } catch (error) {
   console.error('Error loading routes:', error);
 }
@@ -37,6 +42,10 @@ if (youtubeClaimRoutes) app.use('/api/youtube-claims', youtubeClaimRoutes);
 if (youtubeOacRoutes) app.use('/api/youtube-oac', youtubeOacRoutes);
 if (socialMediaLinkingRoutes) app.use('/api/social-media-linking', socialMediaLinkingRoutes);
 if (labelPublisherRoutes) app.use('/api/label-publisher', labelPublisherRoutes);
+if (artistProfileLinkingRoutes) app.use('/api/artist-profile-linking', artistProfileLinkingRoutes);
+if (customLabelRoutes) app.use('/api/custom-labels', customLabelRoutes);
+if (agreementRoutes) app.use('/api/agreement', agreementRoutes);
+if (userProfileRoutes) app.use('/api/user-profile', userProfileRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
