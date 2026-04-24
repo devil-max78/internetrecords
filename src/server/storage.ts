@@ -21,7 +21,7 @@ export const initializeStorage = async () => {
       const { error: createError } = await supabase.storage.createBucket(BUCKET_NAME, {
         public: false,
         fileSizeLimit: 52428800, // 50MB
-        allowedMimeTypes: ['audio/*', 'image/*', 'application/json']
+        allowedMimeTypes: ['audio/wav', 'audio/x-wav', 'image/*', 'application/json']
       });
       
       if (createError) {

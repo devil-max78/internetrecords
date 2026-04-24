@@ -531,12 +531,12 @@ function AdminComponent() {
                             onPlay={() => setPlayingTrackId(track.id)}
                             onPause={() => setPlayingTrackId(null)}
                           >
-                            <source src={audioUrl} type="audio/mpeg" />
+                            <source src={audioUrl} type="audio/wav" />
                             Your browser does not support the audio element.
                           </audio>
                           <a
                             href={audioUrl}
-                            download={`${track.title}.mp3`}
+                            download={`${track.title}.wav`}
                             className="inline-block mt-2 text-sm text-blue-600 hover:text-blue-800"
                           >
                             Download Audio

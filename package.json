@@ -24,6 +24,8 @@
     "create:admin": "ts-node scripts/create-supabase-admin.ts"
   },
   "dependencies": {
+    "@clerk/clerk-react": "^5.61.4",
+    "@clerk/clerk-sdk-node": "^4.13.23",
     "@prisma/client": "^5.0.0",
     "@supabase/supabase-js": "^2.78.0",
     "@tanstack/react-query": "^4.29.19",

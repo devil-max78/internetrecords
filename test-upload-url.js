@@ -10,7 +10,7 @@ async function testUploadUrl() {
   console.log('Testing upload URL generation...\n');
   
   try {
-    const testFilePath = 'test-release-id/audio/test-file.mp3';
+    const testFilePath = 'test-release-id/audio/test-file.wav';
     
     console.log('1. Testing createSignedUploadUrl...');
     const { data, error } = await supabase.storage
@@ -34,7 +34,7 @@ async function testUploadUrl() {
       method: 'PUT',
       body: testContent,
       headers: {
-        'Content-Type': 'audio/mpeg',
+        'Content-Type': 'audio/wav',
       },
     });
     
